@@ -1,0 +1,18 @@
+﻿
+# 敏感文件：本地加密密钥，绝不提交
+secret.key
+
+# JWT 密钥（未配置 JWT_SECRET_KEY 时后端自动生成并持久化于此），绝不提交
+jwt.key
+jwt.key.*
+
+# Python 缓存与虚拟环境
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+

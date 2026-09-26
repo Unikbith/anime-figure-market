@@ -1,0 +1,159 @@
+/* =========================================================================
+ * 次元模仓 · 全局共享样式与品牌令牌
+ * -------------------------------------------------------------------------
+ * 设计原则（见 frontend-design skill）：所有颜色写 CSS 变量，组件内禁止硬编码色值。
+ * 这里集中维护品牌色与少量高频复用类，消灭各组件里重复粘贴的 .pink-btn /
+ * .full-select / .form-tip 等碎片样式。
+ * 该文件在 main.js 中全局引入（非 scoped），对全站生效。
+ * ========================================================================= */
+
+/* 全站统一页面底色：页面自身不设背景时继承这里，避免各页背景不一致 */
+body {
+  background: var(--bg, #f4f6f8);
+}
+
+:root {
+  /* —— 品牌色（唯一真源，之前散落在各文件硬编码 #fb7299）—— */
+  --brand: #fb7299;
+  --brand-hover: #f7507f;
+  --brand-soft: rgba(251, 114, 153, 0.12);
+
+  /* —— 次级强调色（低调中性蓝：个人中心、监控图表、认证页共用）—— */
+  --accent: #6a9bdb;
+  --accent-hover: #587fb8;
+  --accent-soft: rgba(106, 155, 219, 0.12);
+
+  /* —— 语义表面色（整体低调内敛：中性浅灰底 + 白色面板 + 细边框）—— */
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --text: #262626;
+  --text-muted: #8c8c8c;
+  --border: #f0f0f0;
+
+  /* —— 形状与阴影尺度 —— */
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-pop: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+  /* —— 动效时长 —— */
+  --dur-fast: 160ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =========================================================================
+ * 复用类
+ * ========================================================================= */
+
+/* 品牌主按钮：用 Element Plus 的 CSS 变量覆盖，确保所有 el-button 一致 */
+.pink-btn.el-button--primary {
+  --el-button-bg-color: var(--brand);
+  --el-button-border-color: var(--brand);
+  --el-button-hover-bg-color: var(--brand-hover);
+  --el-button-hover-border-color: var(--brand-hover);
+  --el-button-active-bg-color: var(--brand-hover);
+  --el-button-active-border-color: var(--brand-hover);
+  --el-button-disabled-bg-color: var(--brand-soft);
+  --el-button-disabled-border-color: var(--brand-soft);
+}
+
+/* 表单内占满宽度的下拉 */
+.full-select {
+  width: 100%;
+}
+
+/* 表单下方灰色提示文字 */
+.form-tip {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #999;
+  line-height: 1.5;
+}
+
+/* =========================================================================
+ * 通用列表项滑入动画（虚拟列表复用）
+ * 用法：列表项根元素加 class="slide-in-item" 即可，全站统一，无需每页单独实现
+ * ========================================================================= */
+.slide-in-item {
+  animation: slide-in-up var(--dur-slow, 320ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+@keyframes slide-in-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 尊重系统"减少动画"偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .slide-in-item { animation: none; }
+}
+
+/* =========================================================================
+ * 无限滚动触底哨兵（配合 useInfiniteLoad 全站复用）
+ * ========================================================================= */
+.load-sentinel {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding: 28px 0 8px;
+}
+.load-hint {
+  font-size: 13px;
+  color: #8c8c8c;
+  letter-spacing: 1px;
+}
+
+/* 后台弹窗表单统一标签宽度与节奏（原先每个弹窗各自写 class 名但无实际样式） */
+.admin-dialog-form .el-form-item {
+  margin-bottom: 18px;
+}
+
+/* =========================================================================
+ * 管理后台弹窗统一皮肤（el-dialog 会 teleport 到 body，scoped 样式够不着，
+ * 必须走全局；仅作用于带 .admin-dialog 的弹窗，不影响前台）
+ * ========================================================================= */
+.admin-dialog {
+  --el-dialog-border-radius: 14px;
+}
+.admin-dialog .el-dialog__header {
+  padding: 18px 24px 14px;
+  margin-right: 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.admin-dialog .el-dialog__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+.admin-dialog .el-dialog__title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 15px;
+  background: var(--accent, #6a9bdb);
+  border-radius: 2px;
+  margin-right: 10px;
+  vertical-align: -2px;
+}
+.admin-dialog .el-dialog__body {
+  padding: 18px 24px 6px;
+}
+.admin-dialog .el-dialog__footer {
+  padding: 14px 24px 18px;
+  border-top: 1px solid #f0f0f0;
+}
+.admin-dialog .el-dialog__footer .el-button {
+  min-width: 88px;
+  border-radius: 8px;
+}
+.admin-dialog .el-form-item__label {
+  color: #595959;
+}
+.admin-dialog .el-input__wrapper,
+.admin-dialog .el-textarea__inner {
+  border-radius: 8px;
+}
+.admin-dialog .el-input.is-disabled .el-input__wrapper {
+  background: #f7f8fa;
+}

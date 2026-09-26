@@ -1,0 +1,19 @@
+# 次元模仓 · 后端依赖（本地开发）
+# 安装：pip install -r requirements.txt
+#
+# 本地运行只需 MySQL + Redis + MinIO + Celery，无需 Nginx。
+# Elasticsearch 可选：未启动或连接失败时商品检索自动降级为 MySQL 模糊匹配。
+
+flask==2.3.3
+flask-cors==4.0.0
+flask-sqlalchemy==3.0.5
+flask-jwt-extended==4.7.4
+flask-apscheduler==1.13.1
+python-dotenv>=1.0.0
+cryptography
+pymysql
+minio
+redis
+celery
+requests
+PyJWT>=2.11.0
