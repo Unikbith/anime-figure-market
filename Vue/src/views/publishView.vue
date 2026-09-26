@@ -4,7 +4,7 @@
       <h1 class="page-title">{{ editingGoodsId ? '编辑商品' : '商品上架' }}</h1>
       <div class="publish-form">
         <el-form ref="formRef" :model="form" :rules="rules" class="goods-form" label-position="top" @submit.prevent>
-          <!--商品图片上传-->
+          
           <el-form-item label="商品图片">
             <el-upload
               v-model:file-list="imageList"
@@ -23,7 +23,6 @@
             <div class="tips">最多上传10张图片，第一张为主图</div>
           </el-form-item>
 
-          <!--基础信息表单-->
           <div class="form-row">
             <el-form-item class="half" label="商品名称" prop="name">
               <el-input v-model="form.name" placeholder="请输入商品名称" />
@@ -65,7 +64,6 @@
             </el-form-item>
           </div>
 
-          <!--自定义分类输入框-->
           <div class="form-row" v-if="form.category === '其他'">
             <el-form-item class="half" label="自定义分类" prop="customCategory">
               <el-input v-model="form.customCategory" placeholder="请输入自定义分类名称" />
@@ -101,7 +99,6 @@
             </div>
           </el-form-item>
 
-          <!--提交按钮-->
           <div class="submit-area">
             <el-button class="goods-submit" :loading="loading" @click="handleSubmit">
               {{ loading ? '提交中...' : (editingGoodsId ? '保存修改' : '发布商品') }}
@@ -114,7 +111,6 @@
 </template>
 
 <script setup>
-// ===== 导入依赖 =====
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
@@ -124,7 +120,6 @@ const router = useRouter();
 const route = useRoute();
 const formRef = ref();
 
-// ===== 响应式数据定义 =====
 const loading = ref(false);
 const editingGoodsId = ref(null);
 const merchantApplyStatus = ref('none');
@@ -147,12 +142,10 @@ const form = reactive({
   services: '',
 });
 
-// 规格参数动态键值对（详情页「规格参数」Tab 渲染来源）
 const specRows = reactive([{ key: '材质', value: '' }, { key: '尺寸', value: '' }]);
 const addSpecRow = () => specRows.push({ key: '', value: '' });
 const removeSpecRow = (i) => { if (specRows.length > 1) specRows.splice(i, 1); };
 
-// ===== 自定义校验：上传至少一张图片 =====
 function validateImages(rule, value, callback) {
   if (imageList.value.length === 0) {
     callback(new Error('请至少上传一张商品图片'));
@@ -161,7 +154,6 @@ function validateImages(rule, value, callback) {
   }
 }
 
-// ===== 表单验证规则 =====
 const rules = {
   name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
   price: [{ required: true, message: '请输入正确的价格', trigger: 'blur' }],
@@ -182,12 +174,10 @@ const rules = {
   images: [{ validator: validateImages, trigger: 'change' }]
 };
 
-// ===== 图片上传触发 =====
 const handleExceed = (files, fileList) => {
   ElMessage.warning('最多只能上传10张图片');
 };
 
-// ===== 上传前校验：单张大小 =====
 const beforeUpload = (file) => {
   if (file.size > 5 * 1024 * 1024) {
     ElMessage.warning(`图片 ${file.name} 超过5MB，已跳过`);
@@ -196,7 +186,6 @@ const beforeUpload = (file) => {
   return true;
 };
 
-// ===== 自定义上传请求（保持原有上传逻辑） =====
 const onUploadRequest = async (options) => {
   const token = sessionStorage.getItem('token');
   if (!token) {
@@ -214,7 +203,6 @@ const onUploadRequest = async (options) => {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     if (response.data.code === 200) {
-      // 回填 URL 以便预览图正常展示
       options.file.url = response.data.url;
       options.file.status = 'success';
       options.onSuccess(response.data);
@@ -226,14 +214,12 @@ const onUploadRequest = async (options) => {
   }
 };
 
-// ===== 分类切换处理 =====
 const handleCategoryChange = () => {
   if (form.category !== '其他') {
     form.customCategory = '';
   }
 };
 
-// ===== 从Token解析角色 =====
 const getRoleFromToken = () => {
   const token = sessionStorage.getItem('token');
   if (!token) return '';
@@ -245,7 +231,6 @@ const getRoleFromToken = () => {
   }
 };
 
-// ===== 获取商家入驻状态 =====
 const getMerchantApplyStatus = async () => {
   if (getRoleFromToken() !== 'merchant') return;
   try {
@@ -258,7 +243,6 @@ const getMerchantApplyStatus = async () => {
   }
 };
 
-// ===== 生命周期钩子 =====
 onMounted(() => {
   const goodsId = route.query.id;
   if (goodsId) {
@@ -268,7 +252,6 @@ onMounted(() => {
   getMerchantApplyStatus();
 });
 
-// ===== API请求方法：获取商品详情用于编辑 =====
 const getGoodsDetail = async (id) => {
   try {
     const res = await request.get(`/api/goods/detail/${id}`);
@@ -302,7 +285,6 @@ const getGoodsDetail = async (id) => {
   }
 };
 
-// ===== 清空表单（发布成功后重置） =====
 function resetForm() {
   Object.assign(form, {
     name: '', price: '', stock: 1, ip: '', character: '',
@@ -313,7 +295,6 @@ function resetForm() {
   editingGoodsId.value = null;
 }
 
-// ===== 表单提交（支持新增和更新） =====
 const handleSubmit = async () => {
   formRef.value.validate(async (valid) => {
     if (!valid) return;
@@ -325,7 +306,6 @@ const handleSubmit = async () => {
       return;
     }
 
-    // 商家入驻状态校验
     if (getRoleFromToken() === 'merchant' && !editingGoodsId.value) {
       if (merchantApplyStatus.value === 'none') {
         ElMessage.warning('请先提交入驻申请，等待管理员审核通过后再发布商品');
@@ -387,7 +367,6 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-/* ===== 页面布局 ===== */
 .publish-page {
   min-height: 100vh;
   padding: 80px 20px 40px;
@@ -409,7 +388,6 @@ const handleSubmit = async () => {
   letter-spacing: -0.5px;
 }
 
-/* ===== 表单容器 ===== */
 .publish-form {
   background: #fafafa;
   padding: 32px;
@@ -426,7 +404,6 @@ const handleSubmit = async () => {
   flex: 1;
 }
 
-/* ===== Element Plus 表单元素 · 统一为原 style ===== */
 .goods-form :deep(.el-form-item__label) {
   font-size: 13px;
   font-weight: 500;
@@ -470,7 +447,6 @@ const handleSubmit = async () => {
   resize: vertical;
 }
 
-/* ===== 图片上传区域 ===== */
 .tips {
   font-size: 12px;
   color: #999;
@@ -516,7 +492,6 @@ const handleSubmit = async () => {
   background: rgba(255, 107, 157, 0.9);
 }
 
-/* ===== 提交按钮 ===== */
 .submit-area {
   margin-top: 8px;
   text-align: center;
@@ -542,7 +517,6 @@ const handleSubmit = async () => {
   opacity: 0.6;
 }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 768px) {
   .publish-page {
     padding: 70px 16px 24px;
@@ -563,7 +537,6 @@ const handleSubmit = async () => {
   }
 }
 
-/* 规格参数编辑器 */
 .spec-editor { width: 100%; }
 .spec-row-input { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
 .spec-key-input { width: 160px; flex-shrink: 0; }

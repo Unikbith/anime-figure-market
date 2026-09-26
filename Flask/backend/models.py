@@ -1,7 +1,6 @@
 """数据模型（2026-09-25 重构：user_info 并入 users，快照表合并，goods 去冗余）"""
 from backend.extensions import db
 
-
 class User(db.Model):
     """用户表（原 user_info 的资料字段已并入）"""
     __tablename__ = 'users'
@@ -13,7 +12,6 @@ class User(db.Model):
     is_banned = db.Column(db.Integer, default=0)
     apply_status = db.Column(db.String(20), default='none')   # 入驻申请状态
     apply_time = db.Column(db.DateTime, nullable=True)         # 入驻申请时间
-    # —— 以下为原 user_info 字段（1:1 拆表无必要，并入主表）——
     avatar = db.Column(db.String(255), default='')
     birthday = db.Column(db.String(20), default='')
     gender = db.Column(db.String(10), default='secret')
@@ -21,7 +19,6 @@ class User(db.Model):
     phone = db.Column(db.String(20), default='')
     receiver_name = db.Column(db.String(50), default='')
     address = db.Column(db.Text, default='')
-
 
 class Goods(db.Model):
     """商品表（merchant_name 冗余字段已删除，商家昵称经 merchant_id 关联 users）"""
@@ -45,7 +42,6 @@ class Goods(db.Model):
     merchant = db.relationship('User', backref='goods_list', lazy='joined')
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
-
 class Cart(db.Model):
     """购物车表"""
     __tablename__ = 'cart'
@@ -54,7 +50,6 @@ class Cart(db.Model):
     goods_id = db.Column(db.Integer, db.ForeignKey('goods.id'), nullable=False)
     num = db.Column(db.Integer, default=1, nullable=False)
     goods = db.relationship('Goods', backref='cart_items', lazy='joined')
-
 
 class Collect(db.Model):
     """用户收藏表"""
@@ -65,7 +60,6 @@ class Collect(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     goods = db.relationship('Goods', backref='collect_items', lazy='joined')
 
-
 class History(db.Model):
     """浏览历史表"""
     __tablename__ = 'user_history'
@@ -74,7 +68,6 @@ class History(db.Model):
     goods_id = db.Column(db.Integer, db.ForeignKey('goods.id'), nullable=False)
     browse_time = db.Column(db.DateTime, server_default=db.func.now())
     goods = db.relationship('Goods', backref='history_items', lazy='joined')
-
 
 class Comment(db.Model):
     """商品评论表"""
@@ -85,7 +78,6 @@ class Comment(db.Model):
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     user = db.relationship('User', backref='comments', lazy='joined')
-
 
 class Order(db.Model):
     """订单主表"""
@@ -102,7 +94,6 @@ class Order(db.Model):
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
     items = db.relationship('OrderItem', backref='order', lazy='joined', cascade='all, delete-orphan')
 
-
 class OrderItem(db.Model):
     """订单商品明细表"""
     __tablename__ = 'order_items'
@@ -113,7 +104,6 @@ class OrderItem(db.Model):
     goods_image = db.Column(db.String(255), nullable=False)
     price = db.Column(db.Numeric(10, 2), nullable=False)
     num = db.Column(db.Integer, nullable=False)
-
 
 class ReturnRequest(db.Model):
     """售后申请表"""
@@ -132,7 +122,6 @@ class ReturnRequest(db.Model):
     user = db.relationship('User', backref='return_requests', lazy='joined')
     goods = db.relationship('Goods', backref='return_requests', lazy='joined')
 
-
 class NotificationLog(db.Model):
     """用户通知记录表"""
     __tablename__ = 'notification_logs'
@@ -148,7 +137,6 @@ class NotificationLog(db.Model):
     goods = db.relationship('Goods', backref='notifications', lazy='joined')
     order = db.relationship('Order', backref='notifications', lazy='joined')
 
-
 class Snapshot(db.Model):
     """监控快照表（原 search_keyword_snapshots + order_status_snapshots 合并）"""
     __tablename__ = 'snapshots'
@@ -159,7 +147,6 @@ class Snapshot(db.Model):
     today_orders = db.Column(db.Integer, default=0)       # 仅 order_status 使用
     today_revenue = db.Column(db.Float, default=0.0)      # 仅 order_status 使用
     updated_at = db.Column(db.DateTime, server_default=db.func.now())
-
 
 class Banner(db.Model):
     """首页轮播运营位（管理后台可维护，避免前端硬编码）"""

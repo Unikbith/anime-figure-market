@@ -30,22 +30,18 @@ body {
   --text-muted: #8c8c8c;
   --border: #f0f0f0;
 
-  /* —— 形状与阴影尺度 —— */
+  
   --radius: 8px;
   --radius-lg: 12px;
   --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
   --shadow-pop: 0 8px 32px rgba(0, 0, 0, 0.2);
 
-  /* —— 动效时长 —— */
+  
   --dur-fast: 160ms;
   --dur-base: 200ms;
   --dur-slow: 320ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-/* =========================================================================
- * 复用类
- * ========================================================================= */
 
 /* 品牌主按钮：用 Element Plus 的 CSS 变量覆盖，确保所有 el-button 一致 */
 .pink-btn.el-button--primary {
@@ -59,12 +55,10 @@ body {
   --el-button-disabled-border-color: var(--brand-soft);
 }
 
-/* 表单内占满宽度的下拉 */
 .full-select {
   width: 100%;
 }
 
-/* 表单下方灰色提示文字 */
 .form-tip {
   margin-top: 6px;
   font-size: 12px;
@@ -84,7 +78,6 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* 尊重系统"减少动画"偏好 */
 @media (prefers-reduced-motion: reduce) {
   .slide-in-item { animation: none; }
 }

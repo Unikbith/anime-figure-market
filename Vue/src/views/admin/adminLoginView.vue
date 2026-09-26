@@ -1,6 +1,6 @@
 <template>
   <div class="admin-login-page">
-    <!-- ===== 登录卡片 ===== -->
+    
     <div class="login-box">
       <h1 class="page-title">管理员后台</h1>
       <form class="login-form" @submit.prevent="handleLogin">
@@ -17,7 +17,7 @@
         </button>
       </form>
       <div class="back-home" @click="goToHome">返回商城首页</div>
-      <!-- ===== 提示消息 ===== -->
+      
       <div v-if="message" class="message" :class="{'error': isError}">
         {{ message }}
       </div>
@@ -26,28 +26,23 @@
 </template>
 
 <script setup>
-// ===== 导入依赖 =====
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import request from '@/api/request'
 
-// ===== 路由实例 =====
 const router = useRouter()
 
-// ===== 响应式数据定义 =====
 const loading = ref(false)
 const message = ref('')
 const isError = ref(false)
 const form = ref({ username: '', password: '' })
 
-// ===== 消息提示方法 =====
 const showMessage = (msg, error = true) => {
   message.value = msg
   isError.value = error
   setTimeout(() => { message.value = '' }, 3000)
 }
 
-// ===== 登录处理方法 =====
 const handleLogin = async () => {
   if (!form.value.username.trim() || !form.value.password.trim()) {
     return showMessage('请输入账号和密码', true)
@@ -70,12 +65,11 @@ const handleLogin = async () => {
   }
 }
 
-// ===== 导航方法 =====
 const goToHome = () => router.push('/')
 </script>
 
 <style scoped>
-/* ===== 页面布局 ===== */
+
 .admin-login-page {
   min-height: 100vh;
   display: flex;
@@ -84,7 +78,6 @@ const goToHome = () => router.push('/')
   background: #f5f7fa;
 }
 
-/* ===== 登录卡片 ===== */
 .login-box {
   width: 400px;
   background: #fff;
@@ -101,7 +94,6 @@ const goToHome = () => router.push('/')
   margin: 0 0 40px;
 }
 
-/* ===== 表单样式 ===== */
 .form-item {
   margin-bottom: 24px;
 }
@@ -130,7 +122,6 @@ const goToHome = () => router.push('/')
   border-color: #6a9bdb;
 }
 
-/* ===== 登录按钮 ===== */
 .btn-primary {
   width: 100%;
   height: 44px;
@@ -153,7 +144,6 @@ const goToHome = () => router.push('/')
   cursor: not-allowed;
 }
 
-/* ===== 返回首页链接 ===== */
 .back-home {
   text-align: center;
   margin-top: 20px;
@@ -167,7 +157,6 @@ const goToHome = () => router.push('/')
   color: #40a9ff;
 }
 
-/* ===== 提示消息 ===== */
 .message {
   text-align: center;
   padding: 12px;
@@ -186,7 +175,6 @@ const goToHome = () => router.push('/')
   background: #f6ffed;
 }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 768px) {
   .admin-login-page {
     padding: 30px 16px;

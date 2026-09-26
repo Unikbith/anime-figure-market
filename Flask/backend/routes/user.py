@@ -36,7 +36,6 @@ def add_history():
         db.session.rollback()
         return jsonify({'code': 500, 'msg': '记录足迹失败'})
 
-
 @bp.route('/api/user/history', methods=['GET'])
 @jwt_required()
 def get_history():
@@ -60,7 +59,6 @@ def get_history():
         print(f"获取足迹错误: {e}")
         return jsonify({'code': 500, 'msg': '获取足迹失败'})
 
-
 @bp.route('/api/user/history/delete', methods=['POST'])
 @jwt_required()
 def delete_history():
@@ -78,7 +76,6 @@ def delete_history():
         db.session.rollback()
         return jsonify({'code': 500, 'msg': '删除失败'})
 
-
 @bp.route('/api/user/history/clear', methods=['POST'])
 @jwt_required()
 def clear_history():
@@ -92,7 +89,6 @@ def clear_history():
         print(f"清空足迹错误: {e}")
         db.session.rollback()
         return jsonify({'code': 500, 'msg': '清空失败'})
-
 
 @bp.route('/api/user/behavior', methods=['POST'])
 @jwt_required()
@@ -113,11 +109,9 @@ def record_user_behavior():
         if not goods:
             return jsonify({'code': 404, 'msg': '商品不存在'})
 
-        # 权重映射
         weight_map = {'view': 1, 'collect': 3, 'purchase': 5}
         weight = weight_map.get(behavior_type, 1)
 
-        # 使用Redis存储用户行为权重
         pipe = redis_client.pipeline()
         if goods.ip:
             key = f'user_pref:{user_id}:ip'
@@ -137,7 +131,6 @@ def record_user_behavior():
     except Exception as e:
         print(f"记录用户行为错误: {e}")
         return jsonify({'code': 500, 'msg': '记录失败'})
-
 
 @bp.route('/api/user/notifications', methods=['GET'])
 @jwt_required()
@@ -164,7 +157,6 @@ def get_notifications():
         print(f"获取通知错误: {e}")
         return jsonify({'code': 500, 'msg': '获取通知失败'})
 
-
 @bp.route('/api/user/notifications/read/<int:notification_id>', methods=['POST'])
 @jwt_required()
 def mark_notification_read(notification_id):
@@ -181,7 +173,6 @@ def mark_notification_read(notification_id):
         print(f"标记通知错误: {e}")
         return jsonify({'code': 500, 'msg': '操作失败'})
 
-
 @bp.route('/api/user/notifications/unread-count', methods=['GET'])
 @jwt_required()
 def get_unread_count():
@@ -193,5 +184,3 @@ def get_unread_count():
     except Exception as e:
         print(f"获取未读数错误: {e}")
         return jsonify({'code': 500, 'msg': '获取失败'})
-
-

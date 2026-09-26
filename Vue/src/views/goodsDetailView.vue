@@ -7,16 +7,16 @@
     </div>
     <div class="container">
 
-      <!--返回上一页-->
+      
       <div class="back-nav" v-if="!loading">
         <button class="back-page-btn" @click="router.back()">‹ 返回上一页</button>
       </div>
 
       <LoadingState v-if="loading" message="正在加载商品详情..." />
 
-      <!--商品主内容区-->
+      
       <div v-else class="main-content">
-        <!--图片展示区-->
+        
         <div class="image-section">
           <div class="main-img-wrap">
             <img :src="currentImg" :alt="goodsInfo.name" class="main-img" @error="handleImgError">
@@ -38,10 +38,10 @@
           </div>
         </div>
 
-        <!--商品信息区-->
+        
         <div class="info-section">
           <h1 class="goods-title">{{ goodsInfo.name }}</h1>
-          <!--标签胶囊-->
+          
           <div class="tags-row" v-if="tags.length">
             <span v-for="t in tags" :key="t" class="tag-pill">{{ t }}</span>
           </div>
@@ -70,7 +70,7 @@
             <span class="merchant-name">{{ goodsInfo.merchant_name || '官方店铺' }}</span>
           </div>
 
-          <!--购买操作区-->
+          
           <div class="buy-wrap" v-if="!isMerchant && !isAdmin">
             <div class="stock-info">
               <span>库存：{{ goodsInfo.stock }}件</span>
@@ -84,7 +84,7 @@
               >
                 {{ goodsInfo.status === '下架' ? '已下架' : (goodsInfo.stock <= 0 ? '已售罄' : '加入购物车') }}
               </button>
-              <!--收藏按钮-->
+              
               <button 
                 class="collect-btn" 
                 @click="toggleCollect"
@@ -96,7 +96,7 @@
             </div>
           </div>
 
-          <!--基本信息列表-->
+          
           <div class="base-info-list">
             <div class="info-item" v-if="goodsInfo.ip">
               <span class="info-label">所属IP</span>
@@ -114,7 +114,6 @@
         </div>
       </div>
 
-      <!--商品详情底部区（Tabs：商品详情 / 规格参数 / 用户评论）-->
       <div v-if="!loading" class="detail-bottom">
         <div class="detail-tabs">
           <button class="d-tab" :class="{ active: activeTab === 'detail' }" @click="activeTab = 'detail'">商品详情</button>
@@ -122,7 +121,6 @@
           <button class="d-tab" :class="{ active: activeTab === 'comments' }" @click="activeTab = 'comments'">用户评论</button>
         </div>
 
-        <!-- Tab：商品详情 -->
         <div v-show="activeTab === 'detail'" class="tab-panel">
           <div class="detail-table-card">
             <div class="detail-table">
@@ -155,7 +153,7 @@
             </div>
           </div>
 
-          <!--商品展示图-->
+          
           <div class="img-card" v-if="restImages.length > 0">
             <h3 class="card-title">商品展示</h3>
             <div class="img-grid">
@@ -175,7 +173,6 @@
           </div>
         </div>
 
-        <!-- Tab：规格参数 -->
         <div v-show="activeTab === 'specs'" class="tab-panel">
           <div class="detail-table-card">
             <div class="specs-table" v-if="specEntries.length">
@@ -188,7 +185,6 @@
           </div>
         </div>
 
-        <!-- Tab：用户评论 -->
         <div v-show="activeTab === 'comments'" class="tab-panel">
           <CommentSection :goods-id="goodsInfo.id" />
         </div>
@@ -207,11 +203,9 @@ import CommentSection from '@/components/CommentSection.vue'
 
 import DEFAULT_PLACEHOLDER from '@/assets/images/picture.png'
 
-
 const route = useRoute()
 const router = useRouter()
 
-//用户角色
 const userRole = computed(() => {
   const token = sessionStorage.getItem('adminToken') || sessionStorage.getItem('token')
   if (!token) return ''
@@ -224,10 +218,8 @@ const userRole = computed(() => {
 })
 const isMerchant = computed(() => userRole.value === 'merchant')
 const isAdmin = computed(() => userRole.value === 'admin')
-// 是否已登录（此前缺失该定义，导致收藏/收藏状态查询抛 ReferenceError 而完全无响应）
 const isLoggedIn = computed(() => !!sessionStorage.getItem('token'))
 
-//响应式数据定义
 const loading = ref(true)
 const currentIndex = ref(0)
 const isCollected = ref(false)
@@ -254,7 +246,6 @@ const goodsInfo = ref({
   created_at: ''
 })
 
-// 底部 Tabs 与派生数据
 const activeTab = ref('detail')
 const tags = computed(() => goodsInfo.value.tags || [])
 const specEntries = computed(() => Object.entries(goodsInfo.value.specs || {}))
@@ -265,8 +256,6 @@ const serviceList = computed(() =>
     : ['专业包装', '支持7天无理由', '48h内发货']
 )
 
-
-//图片相关
 const currentImg = computed(() => {
   return goodsInfo.value.images?.[currentIndex.value] || DEFAULT_PLACEHOLDER
 })
@@ -283,7 +272,6 @@ const merchantAvatar = computed(() => {
   return goodsInfo.value.merchant_avatar || DEFAULT_PLACEHOLDER
 })
 
-//获取商品详情API请求方法
 const getGoodsDetail = async () => {
   const goodsId = route.params.id
   if (!goodsId) {
@@ -299,7 +287,6 @@ const getGoodsDetail = async () => {
       checkIsCollected()
       // 记录用户浏览行为（用于猜你喜欢推荐）
       recordBrowseBehavior(goodsId)
-      // 记录浏览足迹：详情接口走 publicApi（无 token），需显式上报；
       // 未登录/登录过期时静默失败即可
       if (sessionStorage.getItem('token')) {
         request.post('/api/user/history/add', { goods_id: Number(goodsId) }).catch(() => {})
@@ -317,7 +304,6 @@ const getGoodsDetail = async () => {
   }
 }
 
-//记录用户浏览行为
 const recordBrowseBehavior = async (goodsId) => {
   const token = sessionStorage.getItem('token')
   if (!token) return // 未登录不记录
@@ -332,7 +318,6 @@ const recordBrowseBehavior = async (goodsId) => {
   }
 }
 
-//收藏相关方法
 const checkIsCollected = async () => {
   if (!isLoggedIn.value) return
   try {
@@ -363,7 +348,6 @@ const toggleCollect = async () => {
       await request.post('/api/collect/add', { goods_id: goodsInfo.value.id })
       isCollected.value = true
       await showAlert('收藏成功', '', 'success')
-      // 记录收藏行为
       await request.post('/api/user/behavior', { goods_id: goodsInfo.value.id, type: 'collect' }).catch(() => {})
     }
   } catch (err) {
@@ -374,7 +358,6 @@ const toggleCollect = async () => {
   }
 }
 
-//图片切换方法
 const switchImg = (index) => {
   currentIndex.value = index
 }
@@ -386,7 +369,6 @@ const nextImg = () => {
   if (currentIndex.value < goodsInfo.value.images.length - 1) currentIndex.value++
 }
 
-//加入购物车
 const addToCart = async () => {
   const token = sessionStorage.getItem('token')
   if (!token) {
@@ -411,7 +393,6 @@ const addToCart = async () => {
   }
 }
 
-//图片错误处理
 const handleImgError = (e) => {
   e.target.src = DEFAULT_PLACEHOLDER
 }
@@ -419,15 +400,13 @@ const handleMerchantAvatarError = (e) => {
   e.target.src = DEFAULT_PLACEHOLDER
 }
 
-//生命周期钩子
 onMounted(() => {
   getGoodsDetail()
 })
 </script>
 
-
 <style scoped>
-/* ===== 页面布局 ===== */
+
 .detail-page {
   min-height: 100vh;
   padding: 80px 20px 40px;
@@ -440,7 +419,6 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-/* ===== 商品主内容区 ===== */
 .main-content {
   display: flex;
   gap: 40px;
@@ -450,7 +428,6 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-/* ===== 图片展示区 ===== */
 .image-section {
   flex: 1;
   max-width: 560px;
@@ -537,7 +514,6 @@ onMounted(() => {
   right: -12px;
 }
 
-/* ===== 商品信息区 ===== */
 .info-section {
   flex: 1;
   display: flex;
@@ -545,7 +521,6 @@ onMounted(() => {
   gap: 20px;
 }
 
-/* 标签胶囊行（会员购式） */
 .tags-row {
   display: flex;
   gap: 8px;
@@ -561,7 +536,6 @@ onMounted(() => {
   font-weight: 500;
 }
 
-/* 会员购式价格带 */
 .price-band {
   display: flex;
   align-items: center;
@@ -576,7 +550,6 @@ onMounted(() => {
   color: var(--text-muted, #8c8c8c);
 }
 
-/* 标签胶囊行（会员购式） */
 .tags-row {
   display: flex;
   gap: 8px;
@@ -592,7 +565,6 @@ onMounted(() => {
   font-weight: 500;
 }
 
-/* 会员购式价格带 */
 .price-band {
   display: flex;
   align-items: center;
@@ -682,7 +654,6 @@ onMounted(() => {
   color: #333;
 }
 
-/* ===== 购买操作区 ===== */
 .buy-wrap {
   margin-top: auto;
   padding: 20px;
@@ -725,7 +696,6 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-/* ===== 收藏按钮 ===== */
 .collect-btn {
   flex: 1;
   height: 48px;
@@ -751,7 +721,6 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-/* ===== 基本信息列表 ===== */
 .base-info-list {
   display: flex;
   flex-direction: column;
@@ -775,7 +744,6 @@ onMounted(() => {
   color: #333;
 }
 
-/* ===== 详情底部区 ===== */
 .detail-bottom {
   background: #fff;
   border-radius: 12px;
@@ -793,7 +761,6 @@ onMounted(() => {
   padding: 24px 30px;
 }
 
-/* ===== 详情表格 ===== */
 .detail-table-card {
   padding: 24px 30px;
   border-bottom: 1px solid #eee;
@@ -843,7 +810,6 @@ onMounted(() => {
   line-height: 1.6;
 }
 
-/* 多行商品描述（seed 生成的结构化文案） */
 .desc-text {
   white-space: pre-line;
   font-weight: 400;
@@ -851,7 +817,6 @@ onMounted(() => {
   line-height: 1.9;
 }
 
-/* ===== 商品展示图 ===== */
 .img-grid {
   display: flex;
   flex-wrap: wrap;
@@ -878,7 +843,6 @@ onMounted(() => {
   background: #f9f9f9;
 }
 
-/* ===== 下架横幅 ===== */
 .off-shelf-banner {
   max-width: 1200px;
   margin: 0 auto 12px;
@@ -908,7 +872,6 @@ onMounted(() => {
   background: var(--brand-hover);
 }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 1024px) {
   .main-content {
     flex-direction: column;
@@ -980,7 +943,6 @@ onMounted(() => {
   }
 }
 
-/* ===== 底部 Tabs ===== */
 .detail-tabs {
   display: flex;
   gap: 6px;
@@ -1009,7 +971,6 @@ onMounted(() => {
 }
 .tab-panel { animation: slide-in-up 280ms var(--ease-out) both; }
 
-/* ===== 规格参数表 ===== */
 .specs-table { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
 .spec-row {
   display: flex;
@@ -1026,7 +987,6 @@ onMounted(() => {
   .spec-row:nth-child(odd) { border-right: none; }
 }
 
-/* ===== 底部 Tabs ===== */
 .detail-tabs {
   display: flex;
   gap: 6px;
@@ -1055,7 +1015,6 @@ onMounted(() => {
 }
 .tab-panel { animation: slide-in-up 280ms var(--ease-out) both; }
 
-/* ===== 规格参数表 ===== */
 .specs-table { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
 .spec-row {
   display: flex;
@@ -1072,7 +1031,6 @@ onMounted(() => {
   .spec-row:nth-child(odd) { border-right: none; }
 }
 
-/* ===== 返回上一页 ===== */
 .back-nav { margin-bottom: 12px; }
 .back-page-btn {
   padding: 8px 18px;

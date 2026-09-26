@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-//路由组件 - 路由懒加载
 const HomeView = () => import('@/views/homeView.vue')
 const GoodsView = () => import('@/views/goodsView.vue')
 const LoginView = () => import('@/views/loginView.vue')
@@ -21,17 +20,12 @@ const BrandView = () => import('@/views/base/brandView.vue')
 const ConfirmPayView = () => import('@/views/confirmPayView.vue')
 const OrderSettlementView = () => import('@/views/orderSettlementView.vue')
 
-
-//公共工具方法
 const getUserToken = () => sessionStorage.getItem('token')
 const getUserRole = () => sessionStorage.getItem('userRole')
 const getAdminToken = () => sessionStorage.getItem('adminToken')
 
-//路由白名单：无需登录直接访问
 const whiteList = ['/login', '/register', '/reset-password', '/admin/login', '/']
 
-
-//商家权限守卫：仅商家可访问
 const merchantGuard = (to, from, next) => {
   const token = getUserToken()
   const role = getUserRole()
@@ -44,7 +38,6 @@ const merchantGuard = (to, from, next) => {
   }
 }
 
-//管理员权限守卫：仅管理员可访问
 const adminGuard = (to, from, next) => {
   if (getAdminToken()) {
     next()
@@ -53,7 +46,6 @@ const adminGuard = (to, from, next) => {
   }
 }
 
-//普通登录守卫：必须登录才能访问
 const loginGuard = (to, from, next) => {
   if (getUserToken()) {
     next()
@@ -62,7 +54,6 @@ const loginGuard = (to, from, next) => {
   }
 }
 
-//路由配置
 const routes = [
   { path: '/', name: 'Home', component: HomeView },
   { path: '/goods', name: 'Goods', component: GoodsView },
@@ -93,19 +84,15 @@ const routes = [
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 
-//创建路由实例
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  // 切换路由滚动到顶部
   scrollBehavior() {
     return { top: 0, left: 0 }
   }
 })
 
-//全局前置守卫
 router.beforeEach((to, from, next) => {
-  // 白名单直接放行
   if (whiteList.includes(to.path)) {
     next()
     return

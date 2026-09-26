@@ -18,20 +18,16 @@ INDEX = 'goods_index'
 _es_down_until = 0        # ES 故障冷却截止时间戳
 _es_lock = threading.Lock()
 
-
 def _url(path):
     return f'http://{ES_HOST}:{ES_PORT}{path}'
 
-
 def _is_down():
     return time.time() < _es_down_until
-
 
 def _mark_down():
     global _es_down_until
     with _es_lock:
         _es_down_until = time.time() + 60
-
 
 def available():
     """ES 是否可用（探测一次，失败进入 60s 冷却）"""
@@ -42,7 +38,6 @@ def available():
     except Exception:
         _mark_down()
         return False
-
 
 def ensure_index():
     """索引不存在则创建（standard 分词：中文按单字切分，够用且无插件依赖）"""
@@ -68,7 +63,6 @@ def ensure_index():
         _mark_down()
         return False
 
-
 def _doc(g):
     """goods 模型对象 → ES 文档"""
     return {
@@ -81,7 +75,6 @@ def _doc(g):
         'status': g.status or '',
     }
 
-
 def index_goods(goods):
     """同步单个商品到 ES"""
     if not available():
@@ -91,7 +84,6 @@ def index_goods(goods):
     except Exception:
         _mark_down()
 
-
 def delete_goods(goods_id):
     if not available():
         return
@@ -99,7 +91,6 @@ def delete_goods(goods_id):
         _http.delete(_url(f'/{INDEX}/_doc/{goods_id}'), timeout=3)
     except Exception:
         _mark_down()
-
 
 def search_ids(q, page, size):
     """全文检索，返回 (按相关度排序的 goods id 列表, 命中总数)。
@@ -133,7 +124,6 @@ def search_ids(q, page, size):
         _mark_down()
         return None
 
-
 def rebuild_all():
     """全量重建索引（MySQL → ES），后台线程调用"""
     with app.app_context():
@@ -147,7 +137,6 @@ def rebuild_all():
         except Exception as e:
             _mark_down()
             print(f'ES 全量重建失败（搜索将降级 MySQL）: {e}')
-
 
 def rebuild_async():
     """应用启动时后台重建（不阻塞启动）"""

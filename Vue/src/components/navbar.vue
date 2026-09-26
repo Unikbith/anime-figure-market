@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <!--左侧滑出抽屉-->
+    
     <div class="left-drawer-overlay" v-show="showLeftDrawer" @click="showLeftDrawer = false"></div>
     <div class="left-drawer" :class="{ open: showLeftDrawer }">
       <div class="drawer-header">
@@ -30,7 +30,7 @@
       </a>
     </div>
 
-    <!--导航链接-->
+    
     <div class="nav-links">
       <router-link to="/">首页</router-link>
       <router-link to="/goods">商品列表</router-link>
@@ -42,7 +42,7 @@
         <router-link to="/cart">购物车</router-link>
       </template>
 
-      <!--消息通知-->
+      
       <div 
         v-if="isLoggedIn && userRole !== 'merchant' && userRole !== 'admin'" 
         class="notification-text-wrapper"
@@ -51,7 +51,7 @@
         <span v-if="unreadCount > 0" class="nav-notification-badge">
           {{ unreadCount > 99 ? '99+' : unreadCount }}
         </span>
-        <!--通知下拉面板-->
+        
         <div class="nav-notification-panel" v-show="showNotificationPanel" @click.stop>
           <div class="panel-header">
             <span class="panel-title">消息通知</span>
@@ -79,7 +79,7 @@
         </div>
       </div>
 
-      <!--用户名-->
+      
       <template v-if="isLoggedIn">
         <span class="nav-user-text" @click="goToProfile">{{ nickname }}</span>
       </template>
@@ -92,7 +92,7 @@
       </router-link>
     </div>
 
-    <!--移动端汉堡按钮-->
+    
     <button class="hamburger-btn" @click="showMobileMenu = !showMobileMenu">
       <span :class="['hamburger-line', { open: showMobileMenu }]"></span>
       <span :class="['hamburger-line', { open: showMobileMenu }]"></span>
@@ -100,7 +100,7 @@
     </button>
   </nav>
 
-  <!--移动端侧边菜单-->
+  
   <div class="mobile-overlay" v-show="showMobileMenu" @click="showMobileMenu = false"></div>
   <div class="mobile-menu" :class="{ open: showMobileMenu }">
     <div class="mobile-menu-header">
@@ -133,7 +133,7 @@
     </div>
   </div>
 
-  <!--客服悬浮球-->
+  
   <div
     class="customer-service-container"
     @click.stop
@@ -143,7 +143,7 @@
       <img :src="SERVICE_ICON" class="service-icon" alt="客服">
     </div>
 
-    <!--聊天面板-->
+    
     <div class="service-panel" v-show="showServicePanel">
       <div class="panel-header service-header">
         <span class="panel-title">在线客服</span>
@@ -160,7 +160,7 @@
             :class="['service-message', msg.type]"
           >
             <span class="message-text">{{ msg.content }}</span>
-            <!--商品卡片-->
+            
             <div v-if="msg.goods" class="chat-goods-card" @click="goToGoodsDetail(msg.goods.id)">
               <img :src="msg.goods.image" :alt="msg.goods.name" class="chat-goods-img" @error="handleImgError">
               <div class="chat-goods-info">
@@ -173,7 +173,7 @@
               </div>
             </div>
           </div>
-          <!--打字动画-->
+          
           <div v-if="aiLoading" class="service-message system">
             <span class="message-text typing-indicator">
               <span class="typing-dot"></span>
@@ -196,7 +196,7 @@
     </div>
   </div>
 
-  <!--通知详情弹窗-->
+  
   <AppDialog v-model="showDetailModal" title="通知详情">
     <img
       :src="currentNotification.goods_image || DEFAULT_PLACEHOLDER"
@@ -208,7 +208,7 @@
     <p class="modal-time">{{ currentNotification.sent_at }}</p>
   </AppDialog>
 
-  <!--猜你喜欢弹窗-->
+  
   <AppDialog v-model="showRecommendModal" title="猜你喜欢">
     <LoadingState v-if="recommendLoading" :spinner="false" message="加载中..." />
     <EmptyState v-else-if="recommendGoods.length === 0" message="暂无推荐，快去浏览商品吧~" />
@@ -242,38 +242,31 @@ import EmptyState from '@/components/EmptyState.vue';
 
 const router = useRouter();
 
-//下拉菜单状态
 const showMobileMenu = ref(false);
 const showLeftDrawer = ref(false); // 左侧抽屉
 
-//切换左侧抽屉
 const toggleLeftDrawer = () => {
   showLeftDrawer.value = !showLeftDrawer.value;
 };
 
-//登录状态
 const isLoggedIn = ref(false);
 const nickname = ref('');
 const userRole = ref('');
 
-//通知详情弹窗状态
 const showDetailModal = ref(false);
 const currentNotification = ref({}); // 当前查看的通知
 
-//通知相关状态
 const showNotificationPanel = ref(false);
 const notifications = ref([]);
 const unreadCount = ref(0);
 let notificationTimer = null;
 
-//客服相关状态
 const showServicePanel = ref(false);
 const serviceMessages = ref([]);
 const serviceInput = ref('');
 const messagesContainer = ref(null);
 const aiLoading = ref(false);
 
-//客服操作
 const toggleServicePanel = () => {
   showServicePanel.value = !showServicePanel.value;
 };
@@ -281,7 +274,6 @@ const toggleServicePanel = () => {
 const sendServiceMessage = async () => {
   if (!serviceInput.value.trim() || aiLoading.value) return;
   
-  //添加用户消息
   serviceMessages.value.push({
     type: 'user',
     content: serviceInput.value
@@ -291,7 +283,6 @@ const sendServiceMessage = async () => {
   serviceInput.value = '';
   aiLoading.value = true;
   
-  //滚动到底部
   setTimeout(() => {
     if (messagesContainer.value) {
       messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
@@ -299,20 +290,17 @@ const sendServiceMessage = async () => {
   }, 50);
   
   try {
-    //构建对话历史
     const history = serviceMessages.value.map(msg => ({
       role: msg.type === 'user' ? 'user' : 'assistant',
       content: msg.content
     }));
     
-    //调用后端AI客服API
     const res = await request.post('/api/chat', {
       message: userMsg,
       history: history.slice(-10)
     });
     
     if (res.data.code === 200) {
-      //添加AI回复，可能包含商品卡片
       const replyData = res.data.data;
       serviceMessages.value.push({
         type: 'system',
@@ -335,7 +323,6 @@ const sendServiceMessage = async () => {
     aiLoading.value = false;
   }
   
-  //滚动到底部
   setTimeout(() => {
     if (messagesContainer.value) {
       messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
@@ -343,7 +330,6 @@ const sendServiceMessage = async () => {
   }, 50);
 };
 
-//刷新登录状态
 const refreshLoginState = () => {
   const token = sessionStorage.getItem('token');
   const storedNickname = sessionStorage.getItem('nickname');
@@ -368,7 +354,6 @@ const refreshLoginState = () => {
   }
 };
 
-// 获取通知列表
 const fetchNotifications = async () => {
   try {
     const res = await request.get('/api/user/notifications');
@@ -380,7 +365,6 @@ const fetchNotifications = async () => {
   }
 };
 
-// 获取未读通知数量
 const fetchUnreadCount = async () => {
   try {
     const res = await request.get('/api/user/notifications/unread-count');
@@ -392,8 +376,6 @@ const fetchUnreadCount = async () => {
   }
 };
 
-           // 通知轮询
-// 开始轮询
 const startNotificationPolling = () => {
   stopNotificationPolling();
   notificationTimer = setInterval(() => {
@@ -401,7 +383,6 @@ const startNotificationPolling = () => {
   }, 30000);
 };
 
-// 停止轮询
 const stopNotificationPolling = () => {
   if (notificationTimer) {
     clearInterval(notificationTimer);
@@ -409,7 +390,6 @@ const stopNotificationPolling = () => {
   }
 };
 
-// 切换通知面板
 const toggleNotificationPanel = () => {
   showNotificationPanel.value = !showNotificationPanel.value;
   if (showNotificationPanel.value) {
@@ -417,9 +397,7 @@ const toggleNotificationPanel = () => {
   }
 };
 
-// 标记已读 + 打开详情弹窗
 const handleNotificationClick = async (notification) => {
-  // 标记为已读
   if (notification.status === 'sent') {
     try {
       await request.post(`/api/user/notifications/read/${notification.id}`);
@@ -430,19 +408,15 @@ const handleNotificationClick = async (notification) => {
     }
   }
 
-  // 赋值当前通知 + 打开弹窗
   currentNotification.value = notification;
   showDetailModal.value = true;
-  // 关闭通知面板
   showNotificationPanel.value = false;
 };
 
-// 猜你喜欢相关
 const showRecommendModal = ref(false);
 const recommendGoods = ref([]);
 const recommendLoading = ref(false);
 
-// 打开猜你喜欢弹窗
 const openRecommendModal = async () => {
   showRecommendModal.value = true;
   recommendLoading.value = true;
@@ -459,14 +433,12 @@ const openRecommendModal = async () => {
   }
 };
 
-// 跳转商品详情
 const goToGoodsDetail = (goodsId) => {
   showRecommendModal.value = false;
   showServicePanel.value = false;
   router.push(`/goods/detail/${goodsId}`);
 };
 
-// 全部标记为已读
 const clearAllNotifications = async () => {
   try {
     const unreadNotifications = notifications.value.filter(n => n.status === 'sent');
@@ -480,25 +452,21 @@ const clearAllNotifications = async () => {
   }
 };
 
-// 图片错误处理 
 const handleImgError = (e) => {
   e.target.src = DEFAULT_PLACEHOLDER;
 };
 
-// 点击外部关闭面板
 const handleClickOutside = (e) => {
   if (showNotificationPanel.value && !e.target.closest('.notification-text-wrapper')) {
     showNotificationPanel.value = false;
   }
 };
 
-// 生命周期钩子
 onMounted(() => {
   refreshLoginState();
   document.addEventListener('click', handleClickOutside);
 });
 
-// 路由变化监听
 watch(() => router.currentRoute.value.path, () => {
   refreshLoginState();
 });
@@ -508,7 +476,6 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 
-// 退出登录
 const handleLogout = async () => {
   const isConfirm = await showConfirm('确定要退出登录吗？');
   if (isConfirm) {
@@ -523,14 +490,13 @@ const handleLogout = async () => {
   }
 };
 
-// 跳转到个人中心
 const goToProfile = () => {
   router.push('/profile');
 };
 </script>
 
 <style scoped>
-/* ===== 导航栏主体 ===== */
+
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -547,7 +513,6 @@ const goToProfile = () => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* ===== 左侧菜单区域 ===== */
 .menu-container {
   position: relative;
   display: flex;
@@ -561,7 +526,6 @@ const goToProfile = () => {
   flex: 1;
 }
 
-/* ===== 右侧导航链接 ===== */
 .nav-links {
   display: flex;
   align-items: center;
@@ -588,7 +552,6 @@ const goToProfile = () => {
   opacity: 0.8;
 }
 
-/* ===== Logo样式 ===== */
 @keyframes dropdownFade {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
@@ -606,7 +569,6 @@ const goToProfile = () => {
   max-width: 150px;
 }
 
-/* ===== 搜索图标 ===== */
 .search-icon {
   display: flex;
   align-items: center;
@@ -635,7 +597,6 @@ const goToProfile = () => {
   transform: scale(1.1);
 }
 
-/* ===== 菜单按钮 - 优化平滑过渡 ===== */
 .menu-btn {
   background: transparent;
   border: none;
@@ -662,8 +623,6 @@ const goToProfile = () => {
   transform: scale(1.15) rotate(90deg);
 }
 
-
-/* === 客服悬浮按钮样式 === */
 .customer-service-container {
   position: fixed;
   bottom: 120px;
@@ -698,7 +657,6 @@ const goToProfile = () => {
   filter: brightness(0) invert(1);
 }
 
-/* ===== 客服聊天面板 ===== */
 .service-panel {
   position: absolute;
   bottom: 100%;
@@ -812,7 +770,6 @@ const goToProfile = () => {
   transform: scale(1.05);
 }
 
-/* ===== 聊天商品卡片样式 ===== */
 .chat-goods-card {
   display: flex;
   align-items: center;
@@ -876,7 +833,6 @@ const goToProfile = () => {
   margin: 0;
 }
 
-/* ===== 打字动画 ===== */
 .typing-indicator {
   display: inline-flex;
   align-items: center;
@@ -905,7 +861,6 @@ const goToProfile = () => {
   30% { transform: translateY(-6px); opacity: 1; }
 }
 
-/* === 导航栏通知文字样式 === */
 .notification-text-wrapper {
   position: relative;
   display: flex;
@@ -958,7 +913,6 @@ const goToProfile = () => {
   animation: dropdownFade 0.2s ease;
 }
 
-/* === 通知面板头部 === */
 .panel-header {
   display: flex;
   justify-content: space-between;
@@ -997,7 +951,6 @@ const goToProfile = () => {
   font-size: 14px;
 }
 
-/* ===== 通知列表项 ===== */
 .notification-item {
   display: flex;
   gap: 12px;
@@ -1064,7 +1017,6 @@ const goToProfile = () => {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== 面板滚动条 ===== */
 .panel-content::-webkit-scrollbar {
   width: 6px;
 }
@@ -1079,7 +1031,6 @@ const goToProfile = () => {
   background: #a1a1a1;
 }
 
-/* ===== 通知详情弹窗内容 ===== */
 .close-btn {
   background: none;
   border: none;
@@ -1115,8 +1066,6 @@ const goToProfile = () => {
   text-align: center;
 }
 
-
-/* ==== 移动端适配 ==== */
 .hamburger-btn {
   display: none;
   flex-direction: column;
@@ -1150,7 +1099,6 @@ const goToProfile = () => {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ===== 移动端侧边菜单 ===== */
 .mobile-overlay {
   display: none;
   position: fixed;
@@ -1233,7 +1181,6 @@ const goToProfile = () => {
   margin: 8px 0;
 }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 768px) {
   .navbar {
     padding: 0 12px;
@@ -1292,7 +1239,6 @@ const goToProfile = () => {
   }
 }
 
-/* ===== 猜你喜欢弹窗内容 ===== */
 .recommend-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1346,7 +1292,6 @@ const goToProfile = () => {
   }
 }
 
-/* ===== 左侧抽屉样式 - 优化平滑过渡 */
 .left-drawer-overlay {
   position: fixed;
   top: 0;
@@ -1458,7 +1403,6 @@ const goToProfile = () => {
   to { opacity: 1; }
 }
 
-/* ===== 响应式抽屉适配 ===== */
 @media (max-width: 768px) {
   .left-drawer {
     width: 75vw;

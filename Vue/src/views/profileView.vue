@@ -1,7 +1,7 @@
 <template>
   <div class="user-page">
     <div class="container">
-      <!--左侧导航栏-->
+      
       <aside class="menu-sidebar">
         <div class="sidebar-header">
           <div class="avatar-wrap">
@@ -36,7 +36,6 @@
         </nav>
       </aside>
 
-      <!--右侧内容区-->
       <main class="content-area">
         <div v-if="currentTab === 'order'" class="content-panel">
           <h2 class="panel-title">我的订单</h2>
@@ -161,7 +160,6 @@
               </div>
             </div>
           </div>
-          <!--订单分页控件-->
           <Pagination 
             v-if="filteredOrderList.length > 0"
             v-model:currentPage="orderCurrentPage" 
@@ -195,7 +193,6 @@
               </template>
             </ProfileListRow>
           </div>
-          <!--收藏分页控件-->
           <Pagination 
             v-if="collectList.length > 0"
             v-model:currentPage="collectCurrentPage" 
@@ -204,7 +201,6 @@
           />
         </div>
 
-        <!--售后申请弹窗-->
         <AppDialog v-model="showReturnModal" title="申请售后" width="440px">
           <div class="form-item">
             <label>售后类型</label>
@@ -224,7 +220,6 @@
           </template>
         </AppDialog>
 
-        <!--处理售后-->
         <div v-if="currentTab === 'returns'" class="content-panel">
           <div class="panel-header">
             <h2 class="panel-title">处理售后</h2>
@@ -255,7 +250,6 @@
               </div>
             </div>
           </div>
-          <!-- 售后分页控件 -->
           <Pagination 
             v-if="merchantReturnList.length > 0"
             v-model:currentPage="returnCurrentPage" 
@@ -264,7 +258,6 @@
           />
         </div>
 
-        <!--我的商品-->
         <div v-if="currentTab === 'goods'" class="content-panel">
           <div class="panel-header">
             <h2 class="panel-title">我的商品</h2>
@@ -301,7 +294,6 @@
           </div>
         </div>
 
-        <!-- 个人信息 -->
         <div v-if="currentTab === 'info'" class="content-panel">
           <h2 class="panel-title">个人信息</h2>
           <form class="info-form" @submit.prevent="saveUserInfo">
@@ -368,7 +360,6 @@
           </form>
         </div>
 
-        <!--修改昵称 -->
         <div v-if="currentTab === 'nickname'" class="content-panel">
           <h2 class="panel-title">修改昵称</h2>
           <div class="nickname-form">
@@ -380,7 +371,6 @@
           </div>
         </div>
 
-        <!-- 我的足迹 -->
         <div v-if="currentTab === 'history'" class="content-panel">
           <div class="panel-header">
             <h2 class="panel-title">我的足迹</h2>
@@ -413,7 +403,6 @@
               </template>
             </ProfileListRow>
           </div>
-          <!-- 足迹分页控件 -->
           <Pagination 
             v-if="historyList.length > 0"
             v-model:currentPage="historyCurrentPage" 
@@ -422,7 +411,6 @@
           />
         </div>
 
-        <!-- 入驻申请 -->
         <div v-if="currentTab === 'apply'" class="content-panel">
           <div class="panel-header">
             <h2 class="panel-title">入驻申请</h2>
@@ -466,7 +454,6 @@
           </div>
         </div>
 
-        <!-- 修改密码 -->
         <div v-if="currentTab === 'password'" class="content-panel">
           <h2 class="panel-title">修改密码</h2>
           <form class="password-form" @submit.prevent="savePassword">
@@ -504,11 +491,9 @@ import { handleImgError } from '@/utils/imageFallback'
 const router = useRouter()
 const route = useRoute()
 
-//  商家入驻状态
 const merchantApplyStatus = ref('none')
 const merchantApplyTime = ref('')
 
-// 从Token解析角色
 const getRoleFromToken = () => {
   const token = sessionStorage.getItem('token')
   if (!token) return ''
@@ -520,11 +505,9 @@ const getRoleFromToken = () => {
   }
 }
 
-//全局状态
 const userRole = ref('')
 const currentTab = ref('order')
 
-//根据URL参数切换标签页
 const tabMap = {
   'info': 'info',
   'orders': 'order',
@@ -538,18 +521,15 @@ watch(() => route.query.tab, (tab) => {
   }
 }, { immediate: true })
 
-//订单相关数据
 const orderList = ref([])
 const activeStatus = ref('')
 const activeMenuId = ref(null)
 
-//用户信息
 const userInfo = ref({})
 const newNickname = ref('')
 const sidebarAvatarInput = ref(null)
 const passwordData = ref({ oldPassword: '', newPassword: '', confirmPassword: '' })
 
-//地址选择器相关
 const selectedArea = ref([])
 const formData = ref({ 
   birthday: '', 
@@ -563,12 +543,10 @@ const formData = ref({
   fullAddress: ''       
 })
 
-
 const myGoodsList = ref([])
 const historyList = ref([])
 const collectList = ref([])
 
-//分页
 const collectCurrentPage = ref(1)
 const collectPageSize = 10
 const paginatedCollectList = computed(() => {
@@ -590,7 +568,6 @@ const paginatedOrderList = computed(() => {
   return filteredOrderList.value.slice(start, start + orderPageSize)
 })
 
-// 售后相关数据
 const showReturnModal = ref(false)
 const returnOrderId = ref(null)
 const returnForm = ref({ type: 'refund', reason: '' })
@@ -602,7 +579,6 @@ const returnTypeOptions = [
 const merchantReturnList = ref([])
 const userReturnList = ref([])
 
-// 售后分页
 const returnCurrentPage = ref(1)
 const returnPageSize = 10
 const paginatedReturnList = computed(() => {
@@ -610,12 +586,10 @@ const paginatedReturnList = computed(() => {
   return merchantReturnList.value.slice(start, start + returnPageSize)
 })
 
-//待付款订单倒计时 
 const AUTO_CANCEL_SECONDS = 5
 const orderTimerMap = ref({})
 const timerInterval = ref(null)
 
-//倒计时格式化方法 
 const formatCountdown = (seconds) => {
   if (!seconds || seconds <= 0) return ''
   const minutes = Math.floor(seconds / 60)
@@ -629,7 +603,6 @@ const formatCountdown = (seconds) => {
   }
 }
 
-//倒计时启动与自动取消
 const startOrderTimers = () => {
   if (timerInterval.value) clearInterval(timerInterval.value)
   
@@ -692,7 +665,6 @@ const initOrderTimers = () => {
   startOrderTimers()
 }
 
-//左侧菜单列表
 const menuList = computed(() => {
   if (userRole.value === 'merchant') {
     return [
@@ -713,7 +685,6 @@ const menuList = computed(() => {
   }
 })
 
-//订单状态标签
 const orderTabs = computed(() => {
   if (userRole.value === 'merchant') {
     return [
@@ -734,7 +705,6 @@ const orderTabs = computed(() => {
   }
 })
 
-//筛选后的订单列表
 const filteredOrderList = computed(() => {
   let list = [...orderList.value]
   
@@ -749,7 +719,6 @@ const filteredOrderList = computed(() => {
   return list
 })
 
-//收藏相关方法
 const getCollectList = async () => {
   try {
     const res = await request.get('/api/collect/list')
@@ -775,7 +744,6 @@ const deleteCollect = async (collectId) => {
   }
 }
 
-//生命周期钩子
 onMounted(() => {
   userRole.value = getRoleFromToken()
   currentTab.value = 'order'
@@ -811,7 +779,6 @@ onActivated(() => {
   }
 })
 
-//通用导航方法
 const goToHome = () => router.push('/')
 const goToPublish = () => router.push('/publish')
 const goToEditGoods = (goodsId) => router.push(`/publish?id=${goodsId}`)
@@ -824,7 +791,6 @@ const logout = async (force = false) => {
   router.push('/login')
 }
 
-//用户信息获取与更新
 const getUserInfo = async () => {
   const token = sessionStorage.getItem('token')
   if (!token) {
@@ -902,7 +868,6 @@ const getUserInfo = async () => {
   }
 }
 
-//商家入驻相关方法
 const getMerchantApplyStatus = async () => {
   if (userRole.value !== 'merchant') return
   
@@ -935,7 +900,6 @@ const submitMerchantApply = async () => {
   }
 }
 
-//保存用户信息
 const saveUserInfo = async () => {
   if (!formData.value.province || !formData.value.city || !formData.value.district) {
     return await showAlert('请选择完整的省市区信息')
@@ -974,7 +938,6 @@ const saveUserInfo = async () => {
   }
 }
 
-//修改昵称
 const saveNickname = async () => {
   const nickname = newNickname.value.trim()
   if (!nickname) return await showAlert('昵称不能为空')
@@ -997,7 +960,6 @@ const resetNickname = () => {
   newNickname.value = userInfo.value.nickname || ''
 }
 
-//售后状态查询
 const getReturnStatusForOrder = (orderId) => {
   const rr = userReturnList.value.find(r => r.order_id === orderId)
   if (!rr) return '处理中'
@@ -1011,7 +973,6 @@ const getReturnStatusForOrder = (orderId) => {
   return statusMap[rr.status] || rr.status
 }
 
-//头像上传
 const handleSidebarAvatarClick = () => {
   sidebarAvatarInput.value.click()
 }
@@ -1029,7 +990,6 @@ const handleSidebarAvatarUpload = async (e) => {
     const uploadRes = await request.post('/api/upload/image', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
-    // 上传接口失败时返回 HTTP 200 + code:400，不检查会拿到 undefined 的 url 清空头像
     if (uploadRes.data.code !== 200 || !uploadRes.data.url) {
       return await showAlert(uploadRes.data.msg || '上传失败，请重试', '', 'error')
     }
@@ -1041,7 +1001,6 @@ const handleSidebarAvatarUpload = async (e) => {
   }
 }
 
-//修改密码
 const savePassword = async () => {
   const { oldPassword, newPassword, confirmPassword } = passwordData.value
   if (!oldPassword || !newPassword || newPassword !== confirmPassword) {
@@ -1057,7 +1016,6 @@ const savePassword = async () => {
   }
 }
 
-//订单相关方法
 const loading = ref(false)
 
 const getOrderList = async () => {
@@ -1163,7 +1121,6 @@ const deleteOrder = async (orderId) => {
   }
 }
 
-//售后申请方法
 const openReturnModal = (orderId) => {
   activeMenuId.value = null
   returnOrderId.value = orderId
@@ -1238,7 +1195,6 @@ ${actionText}
   }
 }
 
-//售后状态文本转换
 const getReturnTypeText = (type) => ({ refund: '仅退款', return: '退货退款', exchange: '换货' }[type] || type)
 const getReturnStatusText = (status) => ({
   pending: '待处理',
@@ -1247,7 +1203,6 @@ const getReturnStatusText = (status) => ({
   refunded: '已退款'
 }[status] || status)
 
-//商家处理售后方法
 const getMerchantReturns = async () => {
   try {
     const res = await request.get('/api/order/return/merchant')
@@ -1285,7 +1240,6 @@ const completeRefund = async (returnId) => {
   } catch (err) { await showAlert(err.response?.data?.msg || '操作失败', '', 'error') }
 }
 
-//商家商品管理
 const getMyGoods = async () => {
   try {
     const res = await request.get('/api/goods/merchant')
@@ -1316,7 +1270,6 @@ const toggleGoodsStatus = async (item) => {
   }
 }
 
-//删除我的商品
 const deleteMyGoods = async (goodsId) => {
   if (!(await showConfirm('确定删除该商品吗？删除后无法恢复！'))) return
   try {
@@ -1332,7 +1285,6 @@ const deleteMyGoods = async (goodsId) => {
   }
 }
 
-//浏览足迹方法
 const getUserHistory = async () => {
   try {
     const res = await request.get('/api/user/history')
@@ -1380,7 +1332,6 @@ const refreshUserReturns = async () => {
   }
 }
 
-//地址选择器方法
 const handleAreaChange = (value) => {
   if (value && value.length === 3) {
     formData.value.province = codeToText[value[0]] || ''
@@ -1407,7 +1358,6 @@ const updateFullAddress = () => {
   formData.value.fullAddress = `${province}${city}${district}${streetAddress}`
 }
 
-//监听器：标签页切换加载数据
 watch(currentTab, (tab) => {
   if (tab === 'nickname') resetNickname()
   if (tab === 'history') getUserHistory()
@@ -1425,7 +1375,6 @@ watch(currentTab, (tab) => {
   if (tab === 'returns') getMerchantReturns()
 }, { immediate: true })
 
-//监听器：订单状态筛选
 watch(activeStatus, () => {
   if (currentTab.value === 'order') {
     getOrderList()
@@ -1435,7 +1384,6 @@ watch(activeStatus, () => {
 </script>
 
 <style scoped>
-/* ===== 页面布局 ===== */
 .user-page {
   min-height: 100vh;
   padding: 80px 20px 40px;
@@ -1450,7 +1398,6 @@ watch(activeStatus, () => {
   gap: 24px;
 }
 
-/* ===== 左侧侧边栏 ===== */
 .menu-sidebar {
   width: 240px;
   flex-shrink: 0;
@@ -1535,7 +1482,6 @@ watch(activeStatus, () => {
   background: #fff1f0;
 }
 
-/* ===== 右侧内容区 ===== */
 .content-area {
   flex: 1;
   background: #fff;
@@ -1597,7 +1543,6 @@ watch(activeStatus, () => {
   font-size: 16px;
 }
 
-/* ===== 订单状态标签 ===== */
 .order-status-tabs {
   display: flex;
   gap: 32px;
@@ -1620,7 +1565,6 @@ watch(activeStatus, () => {
   border-bottom-color: #fb7299;
 }
 
-/* ===== 订单卡片 ===== */
 .order-card {
   border: 1px solid #f0f0f0;
   border-radius: 8px;
@@ -1758,7 +1702,6 @@ watch(activeStatus, () => {
   margin: 0;
 }
 
-/* ===== 入驻申请页面 ===== */
 .apply-container {
   padding: 20px 0;
 }
@@ -1837,7 +1780,6 @@ watch(activeStatus, () => {
   color: var(--brand);
 }
 
-/* ===== 订单操作按钮 ===== */
 .btn-pay { background: #fb7299; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-size: 14px; cursor: pointer; }
 .btn-pay:hover { background: #f56a8f; }
 .btn-receive { background: #fb7299; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-size: 14px; cursor: pointer; }
@@ -1848,14 +1790,12 @@ watch(activeStatus, () => {
 .btn-refund-status:hover { background: #d48806; }
 .refunded-tag { font-size: 14px; color: #999; font-weight: 500; }
 
-/* ===== 商品/足迹/收藏列表 ===== */
 .goods-list, .history-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* ===== 按钮样式（列表项动作） ===== */
 .btn-edit {
   background: #fb7299;
   border: none;
@@ -1926,7 +1866,6 @@ watch(activeStatus, () => {
   background: #fff1f0;
 }
 
-/* ===== 表单样式 ===== */
 .info-form, .password-form, .nickname-form {
   max-width: 500px;
 }
@@ -1966,7 +1905,6 @@ watch(activeStatus, () => {
 .radio-group { display: flex; gap: 24px; }
 .radio-item { display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
-/* ===== 按钮样式 ===== */
 .btn-primary {
   height: 44px;
   padding: 0 24px;
@@ -1994,7 +1932,6 @@ watch(activeStatus, () => {
 
 .btn-group { margin-top: 24px; }
 
-/* ===== 售后弹窗 ===== */
 :deep(.cancel-btn) {
   flex: 1;
   padding: 14px;
@@ -2068,7 +2005,6 @@ watch(activeStatus, () => {
 }
 .btn-reject:hover { border-color: #ff4d4f; color: #ff4d4f; }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 768px) {
   .user-page .container {
     flex-direction: column !important;

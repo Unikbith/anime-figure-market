@@ -43,7 +43,6 @@ def chat_with_ai():
         # 确保商品缓存和Redis索引可用
         get_cached_goods()
 
-        # 调用AI：同时完成意图分析 + 对话回复
         headers = {
             "Authorization": f"Bearer {ZHIPU_API_KEY}",
             "Content-Type": "application/json"
@@ -106,18 +105,15 @@ chat
             raw_reply = result['choices'][0]['message']['content']
             print(f"[AI原始回复] {raw_reply}")
 
-            # 解析AI回复：提取意图和关键词
             lines = raw_reply.strip().split('\n', 1)
             first_line = lines[0].strip()
             reply_body = lines[1].strip() if len(lines) > 1 else first_line
 
             if first_line.lower().startswith('purchase:'):
-                # 有购买意图，提取关键词
                 keywords_str = first_line[len('purchase:'):].strip()
                 keywords = [k.strip() for k in keywords_str.split(',') if k.strip()]
                 print(f"[意图分析] 购买意图，关键词: {keywords}")
 
-                # 用关键词在Redis中进行多字段加权搜索
                 goods_data = search_by_redis_index(keywords, user_message)
                 ai_reply = reply_body
 
@@ -126,11 +122,9 @@ chat
                 ai_reply = re.sub(r'商品[ID编号：:]*\d+', '', ai_reply).strip()
 
             elif first_line.lower() == 'chat':
-                # 无购买意图，纯对话
                 ai_reply = reply_body
                 print("[意图分析] 普通对话")
             else:
-                # 解析失败，直接用原始回复
                 ai_reply = raw_reply
                 print("[意图分析] 解析失败，使用原始回复")
         else:
@@ -154,5 +148,3 @@ chat
         traceback.print_exc()
         fallback_reply = get_fallback_reply(user_message if 'user_message' in dir() else '')
         return jsonify({'code': 200, 'data': {'reply': fallback_reply, 'goods': None}})
-
-

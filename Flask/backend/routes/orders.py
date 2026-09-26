@@ -41,7 +41,6 @@ def create_order():
         if not receiver_address and user and user.address:
             receiver_address = user.address
 
-        # 逐项扣减库存
         for item in cart_items:
             if not deduct_stock_redis(item.goods_id, item.num):
                 return jsonify({'code': 400, 'msg': f'商品"{item.goods.name}"库存不足'}), 400
@@ -80,13 +79,11 @@ def create_order():
 
         return jsonify({'code': 200, 'msg': '订单创建成功', 'order_no': order_no, 'order_id': new_order.id}), 200
     except Exception as e:
-        # 异常时回滚Redis库存
         for goods_id, num in cart_snapshot:
             redis_client.incrby(f"goods_stock:{goods_id}", num)
         db.session.rollback()
         print(f"创建订单错误: {e}")
         return jsonify({'code': 500, 'msg': '创建订单失败'}), 500
-
 
 @bp.route('/api/order/cancel/<string:order_no>', methods=['POST'])
 @jwt_required()
@@ -110,7 +107,6 @@ def cancel_order(order_no):
                 if goods:
                     goods.stock += item.num
                     redis_client.incrby(f"goods_stock:{item.goods_id}", item.num)
-        # 恢复购物车
         for item in order.items:
             existing_cart = Cart.query.filter_by(user_id=user_id, goods_id=item.goods_id).first()
             if existing_cart:
@@ -124,7 +120,6 @@ def cancel_order(order_no):
         db.session.rollback()
         print(f"取消订单错误: {e}")
         return jsonify({'code': 500, 'msg': '取消订单失败，请稍后重试'}), 500
-
 
 @bp.route('/api/order/delete/<int:order_id>', methods=['DELETE'])
 @jwt_required()
@@ -162,7 +157,6 @@ def delete_order(order_id):
         print(f"删除订单错误: {e}")
         return jsonify({'code': 500, 'msg': '删除失败'}), 500
 
-
 @bp.route('/api/order/confirm/<string:order_no>', methods=['POST'])
 @jwt_required()
 def confirm_pay(order_no):
@@ -183,7 +177,6 @@ def confirm_pay(order_no):
         db.session.rollback()
         print(f"确认支付错误: {e}")
         return jsonify({'code': 500, 'msg': '支付失败'}), 500
-
 
 @bp.route('/api/order/confirm-public/<string:order_no>', methods=['POST'])
 @jwt_required()
@@ -209,7 +202,6 @@ def confirm_pay_public(order_no):
         print(f"公开支付错误: {e}")
         return jsonify({'code': 500, 'msg': '支付失败，请重试'}), 500
 
-
 @bp.route('/api/order/list', methods=['GET'])
 @jwt_required()
 def get_order_list():
@@ -220,7 +212,6 @@ def get_order_list():
         status = request.args.get('status', '')
 
         if user['role'] == 'merchant':
-            # 商家只能看到包含自己商品的订单
             merchant_id = user['id']
             order_items = OrderItem.query.join(Goods).filter(Goods.merchant_id == merchant_id).all()
             order_ids = list(set([item.order_id for item in order_items]))
@@ -241,7 +232,6 @@ def get_order_list():
             merchant_total = 0.0
             for item in order.items:
                 if user['role'] == 'merchant':
-                    # 只展示自己的商品
                     goods = Goods.query.get(item.goods_id)
                     if goods and goods.merchant_id == user['id']:
                         item_data = {
@@ -279,7 +269,6 @@ def get_order_list():
         print(f"获取订单列表错误: {e}")
         return jsonify({'code': 500, 'msg': '获取订单失败'})
 
-
 @bp.route('/api/order/receive/<int:order_id>', methods=['POST'])
 @jwt_required()
 def receive_order(order_id):
@@ -299,7 +288,6 @@ def receive_order(order_id):
         print(f"确认收货错误: {e}")
         return jsonify({'code': 500, 'msg': '确认收货失败'})
 
-
 @bp.route('/api/order/ship/<int:order_id>', methods=['POST'])
 @jwt_required()
 def ship_order(order_id):
@@ -312,7 +300,6 @@ def ship_order(order_id):
         if order.status != 'pending_ship':
             return jsonify({'code': 400, 'msg': '订单状态错误，无法发货'}), 400
 
-        # 校验订单中是否包含该商家的商品
         has_merchant_goods = False
         for item in order.items:
             goods = Goods.query.get(item.goods_id)
@@ -330,7 +317,6 @@ def ship_order(order_id):
         db.session.rollback()
         print(f"发货错误: {e}")
         return jsonify({'code': 500, 'msg': '发货失败'})
-
 
 @bp.route('/api/order/public/<string:order_no>', methods=['GET'])
 def get_order_public(order_no):
@@ -350,7 +336,6 @@ def get_order_public(order_no):
     except Exception as e:
         print(f"查询订单错误: {e}")
         return jsonify({'code': 500, 'msg': '查询订单失败'})
-
 
 @bp.route('/api/order/return/apply', methods=['POST'])
 @jwt_required()
@@ -407,7 +392,6 @@ def apply_return():
         print(f"售后申请接口异常: {str(e)}")
         return jsonify({'code': 500, 'msg': '售后申请失败，服务器异常'}), 500
 
-
 @bp.route('/api/order/return/list', methods=['GET'])
 @jwt_required()
 def get_return_list():
@@ -444,7 +428,6 @@ def get_return_list():
         print(f"查询售后列表异常: {str(e)}")
         return jsonify({'code': 500, 'msg': '获取售后列表失败'})
 
-
 @bp.route('/api/order/return/audit', methods=['POST'])
 @jwt_required()
 def audit_return():
@@ -480,7 +463,6 @@ def audit_return():
         print(f"售后审核异常: {str(e)}")
         return jsonify({'code': 500, 'msg': '审核失败，服务器异常'}), 500
 
-
 @bp.route('/api/order/return/merchant', methods=['GET'])
 @jwt_required()
 def get_merchant_returns():
@@ -511,7 +493,6 @@ def get_merchant_returns():
         print(f"获取商家售后列表异常: {str(e)}")
         return jsonify({'code': 500, 'msg': '获取售后列表失败'})
 
-
 @bp.route('/api/order/return/user', methods=['GET'])
 @jwt_required()
 def get_user_returns():
@@ -537,7 +518,6 @@ def get_user_returns():
         print(f"获取用户售后列表异常: {str(e)}")
         return jsonify({'code': 500, 'msg': '获取售后列表失败'})
 
-
 @bp.route('/api/order/return/approve/<int:return_id>', methods=['POST'])
 @jwt_required()
 def approve_return(return_id):
@@ -559,7 +539,6 @@ def approve_return(return_id):
         db.session.rollback()
         print(f"同意售后异常: {str(e)}")
         return jsonify({'code': 500, 'msg': '操作失败'}), 500
-
 
 @bp.route('/api/order/return/reject/<int:return_id>', methods=['POST'])
 @jwt_required()
@@ -583,7 +562,6 @@ def reject_return(return_id):
         print(f"拒绝售后异常: {str(e)}")
         return jsonify({'code': 500, 'msg': '操作失败'}), 500
 
-
 @bp.route('/api/order/return/refund/<int:return_id>', methods=['POST'])
 @jwt_required()
 def complete_refund(return_id):
@@ -605,7 +583,6 @@ def complete_refund(return_id):
         db.session.rollback()
         print(f"确认退款异常: {str(e)}")
         return jsonify({'code': 500, 'msg': '操作失败'}), 500
-
 
 @bp.route('/api/merchant/apply', methods=['POST'])
 @jwt_required()
@@ -638,7 +615,6 @@ def merchant_apply():
         print(f"提交入驻申请失败: {e}")
         return jsonify({'code': 500, 'msg': '提交申请失败，请稍后重试'}), 500
 
-
 @bp.route('/api/merchant/apply-status', methods=['GET'])
 @jwt_required()
 def get_merchant_apply_status():
@@ -661,4 +637,3 @@ def get_merchant_apply_status():
     except Exception as e:
         print(f"获取入驻状态失败: {e}")
         return jsonify({'code': 500, 'msg': '获取状态失败'}), 500
-

@@ -10,12 +10,10 @@ def scheduled_cancel_expired_orders():
     """每分钟执行一次，取消超时未支付的订单"""
     cancel_expired_orders()
 
-
 @scheduler.task('interval', id='refresh_search_keywords_task', days=7, misfire_grace_time=3600)
 def scheduled_refresh_search_keywords():
     """每7天执行一次，聚合Redis中7天的搜索关键词数据并持久化到MySQL"""
     try:
-        # 聚合最近7天的搜索关键词
         keyword_totals = {}
         for i in range(7):
             day = (datetime.now() - timedelta(days=i)).strftime('%Y%m%d')
@@ -24,7 +22,6 @@ def scheduled_refresh_search_keywords():
                 kw_str = kw.decode() if isinstance(kw, bytes) else kw
                 keyword_totals[kw_str] = keyword_totals.get(kw_str, 0) + int(count)
 
-        # 取Top10写入MySQL
         top10 = sorted(keyword_totals.items(), key=lambda x: x[1], reverse=True)[:10]
         with app.app_context():
             Snapshot.query.filter_by(type='search_keyword').delete()
@@ -34,7 +31,6 @@ def scheduled_refresh_search_keywords():
         print(" 热门搜索关键词快照已更新（7天周期）")
     except Exception as e:
         print(f"更新搜索关键词快照错误: {e}")
-
 
 @scheduler.task('interval', id='refresh_order_status_task', minutes=5, misfire_grace_time=300)
 def scheduled_refresh_order_status():
@@ -71,4 +67,3 @@ def scheduled_refresh_order_status():
     except Exception as e:
         db.session.rollback()
         print(f"更新订单状态分布快照错误: {e}")
-

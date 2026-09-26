@@ -7,9 +7,9 @@
 
       <EmptyState v-else-if="cartList.length === 0" class="empty-cart" message="购物车为空，快去挑选商品吧~" />
 
-      <!--购物车内容区 -->
+      
       <div v-else class="cart-content">
-        <!--商品列表-->
+        
         <div class="cart-item" v-for="item in cartList" :key="item.id">
           <img :src="item.image" alt="" class="item-img" @error="handleImgError">
           <div class="item-info">
@@ -24,7 +24,7 @@
           <button class="del-btn" @click="deleteItem(item.id)">删除</button>
         </div>
 
-        <!--底部结算栏-->
+        
         <div class="cart-footer">
           <div class="total-price">
             合计：<span>¥{{ totalPrice }}</span>
@@ -53,12 +53,10 @@ import { handleImgError } from '@/utils/imageFallback'
 
 const router = useRouter()
 
-//响应式数据定义
 const cartList = ref([])
 const loading = ref(false)
 const isSubmitting = ref(false)
 
-//获取购物车列表API请求方法
 const getCartList = async () => {
   const token = sessionStorage.getItem('token')
   if (!token) {
@@ -75,7 +73,6 @@ const getCartList = async () => {
   } finally { loading.value = false }
 }
 
-//更新商品数量
 const updateNum = async (item, step) => {
   const newNum = item.num + step
   try {
@@ -86,7 +83,6 @@ const updateNum = async (item, step) => {
   }
 }
 
-//删除购物车商品
 const deleteItem = async (id) => {
   if (!(await showConfirm('确定删除？'))) return
   try {
@@ -97,28 +93,24 @@ const deleteItem = async (id) => {
   }
 }
 
-//计算总价
 const totalPrice = computed(() => {
   return cartList.value.reduce((sum, item) => sum + item.price * item.num, 0).toFixed(2)
 })
 
-//跳转到结算页面
 const goToSettlement = async () => {
   if (cartList.value.length === 0) {
     await showAlert('购物车为空，无法结算')
     return
   }
 
-  // 跳转到结算页
   router.push('/orderSettlement')
 }
 
-// 生命周期钩子
 onMounted(() => { getCartList() })
 </script>
 
 <style scoped>
-/* ===== 页面布局 ===== */
+
 .cart-page {
   min-height: 100vh;
   padding: 80px 20px 40px;
@@ -131,7 +123,6 @@ onMounted(() => { getCartList() })
   margin: 0 auto;
 }
 
-/* ===== 页面标题 ===== */
 .page-title {
   font-size: 24px;
   font-weight: 600;
@@ -140,14 +131,12 @@ onMounted(() => { getCartList() })
   margin: 0 0 30px;
 }
 
-/* ===== 购物车内容区 ===== */
 .cart-content {
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
 }
 
-/* ===== 购物车商品项 ===== */
 .cart-item {
   display: flex;
   align-items: center;
@@ -181,7 +170,6 @@ onMounted(() => { getCartList() })
   margin: 0;
 }
 
-/* ===== 数量控制 ===== */
 .num-group {
   display: flex;
   align-items: center;
@@ -210,7 +198,6 @@ onMounted(() => { getCartList() })
   font-size: 16px;
 }
 
-/* ===== 删除按钮 ===== */
 .del-btn {
   color: #ff4d4f;
   background: none;
@@ -223,7 +210,6 @@ onMounted(() => { getCartList() })
   color: #ff7875;
 }
 
-/* ===== 底部结算栏 ===== */
 .cart-footer {
   display: flex;
   justify-content: space-between;
@@ -243,7 +229,6 @@ onMounted(() => { getCartList() })
   font-weight: 600;
 }
 
-/* ===== 结算按钮 ===== */
 .pay-btn {
   background: #fb7299;
   color: #fff;
@@ -263,7 +248,6 @@ onMounted(() => { getCartList() })
   cursor: not-allowed;
 }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 768px) {
   .cart-page {
     padding: 10px 0;

@@ -16,7 +16,7 @@ defineProps({
 </script>
 
 <style scoped>
-/* ===== 页面布局 ===== */
+
 .auth-page {
   min-height: 100vh;
   padding: 40px 20px;
@@ -24,7 +24,6 @@ defineProps({
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
-/* ===== 页面标题 ===== */
 .page-title {
   text-align: center;
   color: #333;
@@ -41,7 +40,6 @@ defineProps({
   align-items: flex-start;
 }
 
-/* ===== 认证卡片 ===== */
 .auth-card {
   background-color: #fff;
   padding: 40px 35px;
@@ -52,9 +50,6 @@ defineProps({
   box-sizing: border-box;
 }
 
-/* ================= 认证页共用样式（仅认证页使用，全局化避免三页重复） ================= */
-
-/* ===== Element Plus 输入框 · 统一为原 style ===== */
 :global(.auth-field) {
   width: 100%;
 }
@@ -77,7 +72,6 @@ defineProps({
   color: #bbb;
 }
 
-/* ===== 主提交按钮 · 浅蓝渐变 ===== */
 :global(.auth-form .btn-primary.el-button) {
   width: 100%;
   height: 52px;
@@ -102,7 +96,6 @@ defineProps({
   box-shadow: none;
 }
 
-/* ===== 发送验证码按钮 · 渐变款（注册页） ===== */
 :global(.auth-code-btn) {
   flex-shrink: 0;
   padding: 0 16px;
@@ -121,7 +114,6 @@ defineProps({
   cursor: not-allowed;
 }
 
-/* ===== 发送验证码按钮 · 描边款（找回密码页） ===== */
 :global(.auth-code-outline) {
   flex-shrink: 0;
   width: 120px;
@@ -146,7 +138,6 @@ defineProps({
   cursor: not-allowed;
 }
 
-/* ===== 角色按钮 ===== */
 :global(.role-buttons) {
   display: flex;
   gap: 12px;
@@ -174,7 +165,6 @@ defineProps({
   color: #6a9bdb;
 }
 
-/* ===== 底部跳转链接 ===== */
 :global(.auth-link) {
   text-align: center;
   color: #666;
@@ -198,7 +188,6 @@ defineProps({
   cursor: default;
 }
 
-/* ===== 邮箱与验证码行 ===== */
 :global(.email-row) {
   display: flex;
   gap: 10px;
@@ -207,7 +196,6 @@ defineProps({
   flex: 1;
 }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 768px) {
   .auth-page {
     padding: 30px 16px;

@@ -12,7 +12,7 @@
         </div>
       </header>
 
-      <!--统计概览-->
+      
       <div class="stats-row">
         <StatCard label="用户总数" :value="userList.length" unit="人" color="blue" />
         <StatCard label="在售商品" :value="goodsList.length" unit="件" color="green" />
@@ -30,7 +30,7 @@
         >{{ tab.label }}</div>
       </div>
 
-      <!--用户管理面板-->
+      
       <div v-if="currentTab === 'users'" class="content-panel">
         <div class="panel-header"><h2 class="panel-title">用户列表</h2></div>
         <div v-if="userList.length" class="table-wrapper">
@@ -71,7 +71,7 @@
         <div v-else class="empty-state"><p>暂无用户</p></div>
       </div>
 
-      <!--商品管理面板-->
+      
       <div v-if="currentTab === 'goods'" class="content-panel">
         <div class="panel-header"><h2 class="panel-title">商品列表</h2></div>
         <div v-if="goodsList.length" class="table-wrapper">
@@ -119,7 +119,7 @@
         <div v-else class="empty-state"><p>暂无商品</p></div>
       </div>
 
-      <!--订单管理面板-->
+      
       <div v-if="currentTab === 'orders'" class="content-panel">
         <div class="panel-header">
           <h2 class="panel-title">订单管理</h2>
@@ -185,7 +185,7 @@
       </div>
     </div>
 
-      <!--轮播管理面板-->
+      
       <div v-if="currentTab === 'banners'" class="content-panel">
         <div class="panel-header">
           <h2 class="panel-title">首页轮播管理</h2>
@@ -227,7 +227,7 @@
         <div v-else class="empty-state"><p>暂无轮播，首页将使用内置示例图</p></div>
       </div>
 
-    <!--弹窗组件-->
+    
     <EditOrderDialog v-model:visible="showEditOrder" :order="editingOrder" @saved="onOrderSaved" />
     <EditGoodsDialog v-model:visible="showEditGoods" :goods="editingGoods" @saved="onGoodsSaved" />
     <EditUserDialog v-model:visible="showEditUser" :user="editingUser" @saved="onUserSaved" />
@@ -251,7 +251,6 @@ import UserDetailDialog from './components/UserDetailDialog.vue'
 const router = useRouter()
 const route = useRoute()
 
-// ===== 响应式数据 =====
 const adminNickname = ref(sessionStorage.getItem('adminNickname') || '')
 const currentTab = ref(['users', 'goods', 'orders', 'banners'].includes(route.query.tab) ? route.query.tab : 'users')
 const tabs = [
@@ -266,7 +265,6 @@ const goodsList = ref([])
 const orderList = ref([])
 const orderFilterStatus = ref('')
 
-// ===== 分页 =====
 const userCurrentPage = ref(1)
 const userPageSize = 10
 const paginatedUserList = computed(() => {
@@ -288,7 +286,6 @@ const paginatedOrderList = computed(() => {
   return orderList.value.slice(start, start + orderPageSize)
 })
 
-// ===== 弹窗状态 =====
 const showEditOrder = ref(false)
 const editingOrder = ref(null)
 const showEditGoods = ref(false)
@@ -309,7 +306,6 @@ const orderStatusOptions = {
   cancelled: '已取消'
 }
 
-// ===== 文本/样式映射工具 =====
 const roleText = (role) => role === 'admin' ? '管理员' : (role === 'merchant' ? '商家' : '普通用户')
 const applyText = (s) => ({ approved: '已入驻', pending: '审核中', rejected: '已拒绝', none: '未申请' }[s] || '')
 
@@ -325,7 +321,6 @@ const formatAddress = (address) => {
   }
 }
 
-// ===== 权限校验 =====
 const checkAuth = async () => {
   if (!sessionStorage.getItem('adminToken')) {
     await showAlert('请先登录！', '', 'error')
@@ -333,7 +328,6 @@ const checkAuth = async () => {
   }
 }
 
-// ===== 用户管理 =====
 const getUserList = async () => {
   try {
     const res = await request.get('/api/admin/users')
@@ -430,7 +424,6 @@ const deleteUser = async (id) => {
   }
 }
 
-// ===== 商品管理 =====
 const getGoodsList = async () => {
   try {
     const res = await request.get('/api/admin/goods')
@@ -499,7 +492,6 @@ const goToGoodsDetail = async (row) => {
   }
 }
 
-// ===== 订单管理 =====
 const getOrderList = async () => {
   try {
     const res = await request.get('/api/admin/orders', {
@@ -606,9 +598,6 @@ const deleteBanner = async (id) => {
   }
 }
 
-// ===== 退出登录（移至侧栏 AdminLayout） =====
-
-// ===== 切换标签加载数据 =====
 const handleTabChange = (tab) => {
   if (tab === 'monitor') {
     router.push('/admin/monitor')
@@ -621,7 +610,6 @@ const handleTabChange = (tab) => {
   if (tab === 'banners') getBannerList()
 }
 
-// ===== 退出登录 =====
 const handleLogout = async () => {
   if (!(await showConfirm('确定退出？'))) return
   sessionStorage.removeItem('adminToken')
@@ -629,7 +617,6 @@ const handleLogout = async () => {
   router.push('/admin/login')
 }
 
-// ===== 累计销售额（全部订单实付合计） =====
 const totalRevenue = computed(() =>
   orderList.value.reduce((sum, o) => {
     const s = o.status
@@ -640,7 +627,6 @@ const totalRevenue = computed(() =>
   }, 0)
 )
 
-// ===== 生命周期钩子：一次性拉全量数据供统计与各面板使用 =====
 onMounted(() => {
   checkAuth()
   getUserList()
@@ -651,7 +637,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ===== 页面容器 ===== */
+
 .admin-dashboard {
   min-height: 100vh;
   background: var(--bg, #f4f6f8);
@@ -660,7 +646,6 @@ onMounted(() => {
 }
 .container { max-width: 1400px; margin: 0 auto; }
 
-/* ===== 顶部导航栏 ===== */
 .dashboard-header {
   background: #fff;
   padding: 16px 24px;
@@ -687,7 +672,6 @@ onMounted(() => {
 }
 .btn-logout:hover { color: #ff6b6b; border-color: #ff6b6b; background: rgba(255,107,107,0.06); }
 
-/* ===== 统计概览行 ===== */
 .stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -695,7 +679,6 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-/* ===== 标签切换栏 ===== */
 .tab-bar {
   background: #fff; padding: 0 24px; border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); display: flex;
@@ -708,7 +691,6 @@ onMounted(() => {
 .tab-item:hover { color: var(--accent); }
 .tab-item.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
 
-/* ===== 内容面板 ===== */
 .content-panel {
   background: #fff; padding: 24px; border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); min-height: auto;
@@ -721,7 +703,6 @@ onMounted(() => {
 .empty-state { text-align: center; padding: 60px 0; color: #999; font-size: 15px; }
 .table-wrapper { overflow-x: auto; }
 
-/* ===== Element Plus 表格 · 统一为原 style ===== */
 .admin-table {
   --el-table-border-color: #eee;
   --el-table-header-bg-color: #fafafa;
@@ -739,10 +720,8 @@ onMounted(() => {
 .nw { white-space: nowrap; }
 .nw { white-space: nowrap; }
 
-/* ===== 商品缩略图 ===== */
 .goods-thumb { width: 48px; height: 48px; border-radius: 4px; object-fit: cover; }
 
-/* ===== 订单地址悬浮 ===== */
 .address-cell {
   max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   display: inline-block; position: relative; cursor: pointer; vertical-align: middle;
@@ -754,7 +733,6 @@ onMounted(() => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* ===== 角色/入驻状态标签 ===== */
 .role-tag {
   display: inline-block; padding: 4px 12px; border-radius: 4px;
   font-size: 12px; font-weight: 500; margin-right: 6px;
@@ -768,7 +746,6 @@ onMounted(() => {
 .role-tag.rejected { background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e; }
 .role-tag.none { background: #f5f5f5; color: #8c8c8c; border: 1px solid #d9d9d9; }
 
-/* ===== 订单状态标签 ===== */
 .order-status-tag {
   display: inline-block; padding: 4px 12px; border-radius: 4px;
   font-size: 12px; font-weight: 500; min-width: 55px; text-align: center;
@@ -781,7 +758,6 @@ onMounted(() => {
 .order-status-tag.refunded { background: #f5f5f5; color: #8c8c8c; }
 .order-status-tag.cancelled { background: #f5f5f5; color: #8c8c8c; }
 
-/* ===== 表格操作按钮（通用） ===== */
 .btn-edit, .btn-delete, .btn-ban {
   height: 32px; padding: 0 16px; background: #fff; border-radius: 6px;
   font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
@@ -819,14 +795,11 @@ onMounted(() => {
 
 .order-actions { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 
-/* ===== 缺货文字 ===== */
 .out-of-stock { color: #C53F3F; font-weight: 500; }
 
-/* ===== 订单筛选下拉框 ===== */
 .order-filter { display: flex; align-items: center; gap: 10px; }
 .filter-select { width: 130px; }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 768px) {
   .admin-dashboard { padding: 16px 8px 20px; }
   .dashboard-header { padding: 12px 14px; flex-direction: column; gap: 10px; align-items: flex-start; }
@@ -850,7 +823,6 @@ onMounted(() => {
   .role-tag, .order-status-tag { padding: 2px 8px; font-size: 11px; }
 }
 
-/* ===== 轮播管理表单 ===== */
 .banner-form {
   display: flex;
   gap: 10px;

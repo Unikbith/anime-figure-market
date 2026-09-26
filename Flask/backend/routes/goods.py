@@ -40,7 +40,6 @@ def upload_image():
         print(f"MinIO错误: {e}")
         return jsonify({'code': 500, 'msg': '图片上传失败'})
 
-
 @bp.route('/api/goods/publish', methods=['POST'])
 @jwt_required()
 def publish_goods():
@@ -52,7 +51,6 @@ def publish_goods():
     if not user_obj:
         return jsonify({'code': 404, 'msg': '用户不存在'}), 404
 
-    # 校验入驻审核状态
     if user_obj.apply_status != 'approved':
         if user_obj.apply_status == 'none':
             return jsonify({'code': 403, 'msg': '请先提交入驻申请，等待管理员审核通过后再发布商品'}), 403
@@ -103,7 +101,6 @@ def publish_goods():
         print(f"发布商品错误: {e}")
         return jsonify({'code': 500, 'msg': '上架失败'})
 
-
 @bp.route('/api/goods/list', methods=['GET'])
 @cache(key_prefix='goods_list', expire=600)
 def get_goods_list():
@@ -144,7 +141,6 @@ def get_goods_list():
         }
     })
 
-
 def _goods_brief(g):
     """列表/搜索用的商品摘要字段"""
     return {
@@ -161,7 +157,6 @@ def _goods_brief(g):
         'merchant_name': g.merchant.nickname if g.merchant else ''
     }
 
-
 @bp.route('/api/goods/search', methods=['GET'])
 def search_goods():
     """商品搜索：优先 Elasticsearch 全文检索，ES 不可用时自动降级 MySQL 模糊匹配"""
@@ -171,7 +166,6 @@ def search_goods():
         size = parse_int(request.args.get('size'), 20, minimum=1, maximum=100)
         if not q:
             return jsonify({'code': 400, 'msg': '搜索关键词不能为空'})
-        # 追踪搜索关键词（监控统计）
         try:
             today_key = datetime.now().strftime('%Y%m%d')
             redis_client.zincrby(f'monitor:search_keywords:{today_key}', 1, q)
@@ -222,12 +216,10 @@ def search_goods():
         print(f"搜索商品错误: {e}")
         return jsonify({'code': 500, 'msg': '搜索失败'})
 
-
 @bp.route('/api/goods/options', methods=['GET'])
 def get_goods_options():
     """获取商品筛选选项（分类、品牌、IP列表）"""
     try:
-        # 从数据库中获取所有不重复的值
         categories = db.session.query(Goods.category).filter(
             Goods.category != None,
             Goods.category != ''
@@ -253,7 +245,6 @@ def get_goods_options():
         print(f"获取商品选项错误: {e}")
         return jsonify({'code': 500, 'msg': '获取选项失败'})
 
-
 @bp.route('/api/goods/detail/<int:id>', methods=['GET'])
 @cache(key_prefix='goods_detail', expire=1800)
 def get_goods_detail(id):
@@ -264,7 +255,6 @@ def get_goods_detail(id):
     if merchant_user:
         merchant_avatar = merchant_user.avatar or ''
 
-    # 自动记录浏览足迹
     token = request.headers.get('Authorization')
     if token and token.startswith('Bearer '):
         try:
@@ -281,7 +271,6 @@ def get_goods_detail(id):
             print(f"自动记录足迹失败: {e}")
 
     images = [fix_image_url(img) for img in g.images.split(',')] if g.images else []
-    # 规格参数 JSON 解析（存库为 JSON 文本；解析失败回退空对象）
     try:
         specs = json.loads(g.specs) if g.specs else {}
         if not isinstance(specs, dict):
@@ -312,7 +301,6 @@ def get_goods_detail(id):
         }
     })
 
-
 @bp.route('/api/goods/merchant', methods=['GET'])
 @jwt_required()
 def get_merchant_goods():
@@ -336,7 +324,6 @@ def get_merchant_goods():
         print(f"获取商家商品错误: {e}")
         return jsonify({'code': 500, 'msg': '获取商品失败'})
 
-
 @bp.route('/api/goods/update/<int:id>', methods=['POST'])
 @jwt_required()
 def update_goods(id):
@@ -353,7 +340,6 @@ def update_goods(id):
         old_status = goods.status
         old_name = goods.name
 
-        # 更新商品字段
         goods.name = data.get('name', goods.name)
         goods.price = data.get('price', goods.price)
         goods.stock = data.get('stock', goods.stock)
@@ -371,11 +357,9 @@ def update_goods(id):
         db.session.commit()
         es.index_goods(goods)   # 同步 ES 索引
 
-        # 同步Redis库存缓存
         new_stock = data.get('stock')
         if new_stock is not None:
             redis_client.set(f"goods_stock:{id}", new_stock)
-        # 清除商品列表和详情缓存
         cache_invalidate('goods_list:*')
         redis_client.delete(f'goods_detail:{id}')
 
@@ -389,7 +373,6 @@ def update_goods(id):
         if old_status != '下架' and new_status == '下架':
             notify_off_shelf.delay(id)
 
-        # 商品名称变更通知
         new_name = data.get('name')
         if new_name is not None and new_name != old_name:
             notify_goods_update.delay(id, old_name, new_name)
@@ -399,7 +382,6 @@ def update_goods(id):
         db.session.rollback()
         print(f"更新商品错误: {e}")
         return jsonify({'code': 500, 'msg': '更新失败'})
-
 
 @bp.route('/api/goods/delete/<int:id>', methods=['DELETE'])
 @jwt_required()
@@ -413,17 +395,14 @@ def delete_goods(id):
         if goods.merchant_id != user['id']:
             return jsonify({'code': 403, 'msg': '无权删除该商品'})
 
-        # 删除关联数据：购物车、收藏、浏览记录
         Cart.query.filter_by(goods_id=id).delete()
         Collect.query.filter_by(goods_id=id).delete()
         History.query.filter_by(goods_id=id).delete()
 
-        # 删除商品
         db.session.delete(goods)
         db.session.commit()
         es.delete_goods(id)   # 同步 ES 索引
 
-        # 清除Redis缓存
         redis_client.delete(f"goods_stock:{id}")
         cache_invalidate('goods_list:*')
         redis_client.delete(f'goods_detail:{id}')
@@ -433,8 +412,6 @@ def delete_goods(id):
         db.session.rollback()
         print(f"删除商品错误: {e}")
         return jsonify({'code': 500, 'msg': '删除失败'})
-
-
 
 def _dump_specs(specs):
     """规格参数序列化：只接受 dict，限制条数与字段长度（防超大 payload）"""

@@ -67,7 +67,6 @@ const countdown = ref(120)
 let countdownTimer = null
 let pollTimer = null
 
-// 获取订单信息API
 const getOrderInfo = async () => {
   const order_no = route.query.order_no
   if (!order_no) {
@@ -99,7 +98,6 @@ const getOrderInfo = async () => {
   }
 }
 
-// 模拟支付
 const mockPaySuccess = async () => {
   paying.value = true
   try {
@@ -107,7 +105,6 @@ const mockPaySuccess = async () => {
     if (res.data.code === 200) {
       clearTimers()
       success.value = true
-      // 记录购买行为
       recordPurchaseBehavior()
     } else {
       error.value = true
@@ -121,10 +118,8 @@ const mockPaySuccess = async () => {
   }
 }
 
-// 记录购买行为
 const recordPurchaseBehavior = async () => {
   try {
-    // 获取订单中的商品并记录购买行为
     const res = await request.get(`/api/order/detail/${orderNo.value}`)
     if (res.data.code === 200 && res.data.data.items) {
       for (const item of res.data.data.items) {
@@ -139,7 +134,6 @@ const recordPurchaseBehavior = async () => {
   }
 }
 
-// 倒计时与轮询方法
 const startCountdown = () => {
   countdownTimer = setInterval(() => {
     countdown.value--
@@ -185,7 +179,6 @@ const goToOrders = () => {
   router.push('/profile')
 }
 
-// 生命周期钩子
 onMounted(() => {
   getOrderInfo()
 })
@@ -196,7 +189,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 页面布局 */
+
 .confirm-pay-page {
   min-height: 100vh;
   display: flex;
@@ -220,7 +213,6 @@ onUnmounted(() => {
   text-align: center;
 }
 
-/* 支付成功/失败状态*/
 .success h2 {
   color: #52c41a;
   margin: 0 0 20px;
@@ -261,7 +253,6 @@ p {
   font-size: 26px;
 }
 
-/* 主按钮 */
 .btn-primary {
   height: 44px;
   padding: 0 30px;
@@ -281,7 +272,6 @@ p {
   background: var(--brand-hover);
 }
 
-/* 二维码区域 */
 .qrcode-container {
   margin-top: 20px;
   display: flex;
@@ -313,7 +303,6 @@ p {
   font-weight: 600;
 }
 
-/* 模拟支付区域 */
 .mock-pay {
   margin-top: 25px;
   padding-top: 20px;
@@ -349,7 +338,6 @@ p {
   cursor: not-allowed;
 }
 
-/* 取消按钮 */
 .btn-cancel {
   height: 40px;
   padding: 0 20px;
@@ -369,7 +357,6 @@ p {
   color: #333;
 }
 
-/* 响应式适配 */
 @media (max-width: 768px) {
   .confirm-pay-page { padding: 12px; }
   .container { padding: 24px 16px; }

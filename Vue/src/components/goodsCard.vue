@@ -1,6 +1,6 @@
 <template>
   <div class="goods-card slide-in-item" @click="goToDetail">
-    <!-- 商品图片区-->
+    
     <div class="img-wrap">
       <img
         :src="goods.images?.[0] || goods.image || fallbackImg"
@@ -11,7 +11,7 @@
       <div v-if="goods.status === '下架'" class="off-shelf-badge">已下架</div>
     </div>
 
-    <!-- 商品信息区 -->
+    
     <div class="goods-info">
       <h3 class="goods-name">{{ goods.name }}</h3>
       <p class="goods-price">¥{{ goods.price }}</p>
@@ -24,7 +24,6 @@ import { useRouter } from 'vue-router'
 import { handleImgError, fallbackImg } from '@/utils/imageFallback'
 const router = useRouter()
 
-// Props定义
 const props = defineProps({
   goods: {
     type: Object,
@@ -32,14 +31,13 @@ const props = defineProps({
   }
 })
 
-// 导航方法：跳转商品详情
 const goToDetail = () => {
   router.push(`/goods/detail/${props.goods.id}`)
 }
 </script>
 
 <style scoped>
-/* 卡片容器 */
+
 .goods-card {
   border-radius: 8px;
   padding: 0;
@@ -59,7 +57,6 @@ const goToDetail = () => {
   box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
-/* 图片区域 */
 .img-wrap {
   position: relative;
   width: 100%;
@@ -91,7 +88,6 @@ const goToDetail = () => {
   z-index: 1;
 }
 
-/* 商品信息区域 */
 .goods-info {
   padding: 12px;
   flex: 1;
@@ -100,7 +96,6 @@ const goToDetail = () => {
   justify-content: space-between;
 }
 
-/* 商品名称 */
 .goods-name {
   font-size: 14px;
   color: #333;
@@ -116,7 +111,6 @@ const goToDetail = () => {
   font-weight: 400;
 }
 
-/* 商品价格 */
 .goods-price {
   font-size: 18px;
   font-weight: 700;
@@ -126,7 +120,6 @@ const goToDetail = () => {
   flex-shrink: 0;
 }
 
-/* 响应式适配 */
 @media (max-width: 768px) {
   .goods-name {
     font-size: 12px;

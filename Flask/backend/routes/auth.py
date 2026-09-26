@@ -34,7 +34,6 @@ def register():
         if not all([nickname, username, password, role, email, code]):
             return jsonify({'code': 400, 'msg': '请完善所有信息'})
 
-        # 安全：自助注册只允许普通用户/商家，禁止注册为管理员（防越权提权）
         if role not in ('user', 'merchant'):
             return jsonify({'code': 400, 'msg': '角色不合法'}), 400
 
@@ -64,7 +63,6 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        # 追踪新注册用户（监控统计）
         try:
             today_key = datetime.now().strftime('%Y%m%d')
             redis_client.incr(f'monitor:new_registrations:{today_key}')
@@ -74,7 +72,6 @@ def register():
 
         redis_client.delete(f"code:{email}")  # 注册成功后清除验证码
         redis_client.delete(f"code_try:{email}")  # 成功即清零尝试计数
-        # 注册成功直接签发登录态：免去二次登录时角色/密码不一致导致的"无法登录"
         access_token = create_access_token(
             identity=str(new_user.id),
             additional_claims={'id': new_user.id, 'role': role, 'nickname': new_user.nickname})
@@ -91,7 +88,6 @@ def register():
         print(f"注册失败：{e}")
         return jsonify({'code': 500, 'msg': '服务器异常，注册失败'})
 
-
 @bp.route('/api/login', methods=['POST'])
 def login():
     """用户登录，返回JWT token"""
@@ -107,7 +103,6 @@ def login():
         if not verify_password(user.password, password):
             return jsonify({'code': 400, 'msg': '用户名/密码/角色错误'})
 
-        # 历史密文在登录成功后静默升级为哈希，逐步淘汰可逆存储
         if is_legacy_password_hash(user.password):
             try:
                 user.password = encrypt_password(password)
@@ -115,7 +110,6 @@ def login():
             except Exception:
                 db.session.rollback()
 
-        # 检查封禁状态
         if user.is_banned:
             return jsonify({'code': 403, 'msg': '您的账号已被封禁，请联系管理员'}), 403
 
@@ -132,7 +126,6 @@ def login():
         print(f"登录错误: {e}")
         return jsonify({'code': 500, 'msg': '登录失败，请稍后重试'}), 500
 
-
 @bp.route('/api/logout', methods=['POST'])
 @jwt_required()
 def logout():
@@ -140,7 +133,6 @@ def logout():
     jti = get_jwt()['jti']
     redis_client.setex(f"jwt_blacklist:{jti}", current_app.config['JWT_ACCESS_TOKEN_EXPIRES'], 1)
     return jsonify({'code': 200, 'msg': '登出成功'})
-
 
 @bp.route('/api/send_code', methods=['POST'])
 def send_code():
@@ -171,7 +163,6 @@ def send_code():
     else:
         return jsonify({'code': 500, 'msg': '验证码发送失败，请检查邮箱'})
 
-
 @bp.route('/api/reset-password-send', methods=['POST'])
 def reset_password_send_code():
     """发送找回密码验证码"""
@@ -185,20 +176,16 @@ def reset_password_send_code():
         if not email or '@' not in email:
             return jsonify({'code': 400, 'msg': '请输入有效的邮箱'}), 400
 
-        # 查找该用户名对应的用户
         user = User.query.filter_by(username=username).first()
         if not user:
             return jsonify({'code': 400, 'msg': '账号不存在'}), 400
 
-        # 验证邮箱是否与该用户匹配
         if (user.email or '') != email:
             return jsonify({'code': 400, 'msg': '账号与邮箱不匹配'}), 400
 
-        # 生成验证码并存入Redis
         code = generate_code()
         redis_client.setex(f"reset_code:{username}:{email}", 300, code)
 
-        # 发送邮件
         msg = MIMEText(f'您的找回密码验证码是：{code}，5分钟内有效，请勿泄露。', 'plain', 'utf-8')
         msg['From'] = f"{Header('次元模仓', 'utf-8').encode()} <{SMTP_USER}>"
         msg['To'] = email
@@ -216,7 +203,6 @@ def reset_password_send_code():
         print(f"发送找回密码验证码失败: {e}")
         return jsonify({'code': 500, 'msg': '验证码发送失败'}), 500
 
-
 @bp.route('/api/reset-password-reset', methods=['POST'])
 def reset_password():
     """重置密码"""
@@ -233,25 +219,20 @@ def reset_password():
         if len(new_password) < 6:
             return jsonify({'code': 400, 'msg': '密码长度不能少于6位'}), 400
 
-        # 验证验证码
         stored_code = redis_client.get(f"reset_code:{username}:{email}")
         if not stored_code or stored_code != code:
             return jsonify({'code': 400, 'msg': '验证码错误或已过期'}), 400
 
-        # 查找用户
         user = User.query.filter_by(username=username).first()
         if not user:
             return jsonify({'code': 400, 'msg': '账号不存在'}), 400
 
-        # 再次验证邮箱
         if (user.email or '') != email:
             return jsonify({'code': 400, 'msg': '账号与邮箱不匹配'}), 400
 
-        # 检查新密码是否与旧密码相同
         if verify_password(user.password, new_password):
             return jsonify({'code': 400, 'msg': '新密码不能与当前密码相同'}), 400
 
-        # 重置密码
         user.password = encrypt_password(new_password)
         redis_client.delete(f"reset_code:{username}:{email}")
         db.session.commit()
@@ -261,7 +242,6 @@ def reset_password():
         db.session.rollback()
         print(f"重置密码失败: {e}")
         return jsonify({'code': 500, 'msg': '重置密码失败'}), 500
-
 
 @bp.route('/api/user/info', methods=['GET'])
 @jwt_required()
@@ -273,14 +253,12 @@ def user_info():
         if not user:
             return jsonify({'code': 404, 'msg': '用户不存在'})
 
-        # 构造结构化地址（省/市/区/详细地址）
         addr_text = user.address or ''
         address_struct = {
             'name': user.receiver_name or '',
             'phone': user.phone or '',
             'province': '', 'city': '', 'district': '', 'detail': addr_text
         }
-        # 简单解析地址字符串
         address_parts = addr_text.split('省')
         if len(address_parts) > 1:
             address_struct['province'] = address_parts[0] + '省'
@@ -315,7 +293,6 @@ def user_info():
         print(f"获取用户信息错误: {e}")
         return jsonify({'code': 500, 'msg': '服务器错误'})
 
-
 @bp.route('/api/user/update', methods=['POST'])
 @jwt_required()
 def update_info():
@@ -330,7 +307,6 @@ def update_info():
         user.gender = data.get('gender', 'secret')
         user.receiver_name = data.get('receiverName', data.get('name', ''))
         user.phone = data.get('phone', '')
-        # 支持结构化地址或纯文本地址
         if 'address_struct' in data:
             addr = data['address_struct']
             user.address = f"{addr.get('province', '')}{addr.get('city', '')}{addr.get('district', '')}{addr.get('detail', '')}"
@@ -342,7 +318,6 @@ def update_info():
         print(f"更新信息错误: {e}")
         db.session.rollback()
         return jsonify({'code': 500, 'msg': '保存失败'})
-
 
 @bp.route('/api/user/update-nickname', methods=['POST'])
 @jwt_required()
@@ -364,7 +339,6 @@ def update_nickname():
         db.session.rollback()
         return jsonify({'code': 500, 'msg': '修改失败'})
 
-
 @bp.route('/api/user/update-avatar', methods=['POST'])
 @jwt_required()
 def update_avatar():
@@ -374,7 +348,6 @@ def update_avatar():
         data = request.get_json(silent=True) or {}
         avatar = (data.get('avatar') or '').strip()
         if not avatar:
-            # 防 undefined/空串清空已有头像（前端上传失败时不应更新）
             return jsonify({'code': 400, 'msg': '头像地址不能为空'})
         user = User.query.get(user_id)
         if not user:
@@ -386,7 +359,6 @@ def update_avatar():
         print(f"更新头像错误: {e}")
         db.session.rollback()
         return jsonify({'code': 500, 'msg': '头像更新失败'})
-
 
 @bp.route('/api/user/update-password', methods=['POST'])
 @jwt_required()
@@ -409,5 +381,4 @@ def update_password():
         print(f"修改密码错误: {e}")
         db.session.rollback()
         return jsonify({'code': 500, 'msg': '修改失败'})
-
 

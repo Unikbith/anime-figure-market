@@ -3,7 +3,6 @@
 from backend.extensions import celery, db, redis_client, app
 from backend.models import Goods, Order, Cart, NotificationLog
 
-
 @celery.task
 def cancel_expired_order_task(order_id):
     """异步取消超时订单（延迟执行）"""
@@ -13,13 +12,11 @@ def cancel_expired_order_task(order_id):
             return
         print(f"自动取消超时订单: {order.order_no}")
         order.status = 'cancelled'
-        # 恢复库存
         for item in order.items:
             goods = Goods.query.get(item.goods_id)
             if goods:
                 goods.stock += item.num
                 redis_client.incrby(f"goods_stock:{item.goods_id}", item.num)
-        # 恢复购物车
         for item in order.items:
             existing_cart = Cart.query.filter_by(user_id=order.user_id, goods_id=item.goods_id).first()
             if existing_cart:
@@ -29,7 +26,6 @@ def cancel_expired_order_task(order_id):
                 db.session.add(new_cart)
         db.session.commit()
         return f"订单{order_id}已取消"
-
 
 @celery.task
 def notify_price_drop(goods_id, old_price, new_price):
@@ -63,7 +59,6 @@ def notify_price_drop(goods_id, old_price, new_price):
             print(f"降价通知任务失败: {e}")
             raise
 
-
 @celery.task
 def notify_off_shelf(goods_id):
     """下架通知：通知所有购物车中有该商品的用户"""
@@ -94,7 +89,6 @@ def notify_off_shelf(goods_id):
             db.session.rollback()
             print(f"下架通知任务失败: {e}")
             raise
-
 
 @celery.task
 def notify_shipment(order_id):
@@ -131,7 +125,6 @@ def notify_shipment(order_id):
             print(f"发货通知任务失败: {e}")
             raise
 
-
 @celery.task
 def notify_goods_update(goods_id, old_name, new_name):
     """商品名称更新通知"""
@@ -162,4 +155,3 @@ def notify_goods_update(goods_id, old_name, new_name):
             db.session.rollback()
             print(f"商品更新通知任务失败: {e}")
             raise
-

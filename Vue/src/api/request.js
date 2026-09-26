@@ -10,7 +10,6 @@ const api = axios.create({
   withCredentials: true // 开启跨域凭证支持
 })
 
-// 请求拦截器
 api.interceptors.request.use(
   (config) => {
     config.headers = config.headers || {}
@@ -23,7 +22,6 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
 
-    // 打印请求日志
     if (process.env.NODE_ENV === 'development') {
       console.log(`[请求] ${config.method.toUpperCase()} ${config.url}`, config.data || config.params)
     }
@@ -36,10 +34,8 @@ api.interceptors.request.use(
   }
 )
 
-// 响应拦截器
 api.interceptors.response.use(
   (response) => {
-    // 打印响应日志
     if (process.env.NODE_ENV === 'development') {
       console.log(`[响应] ${response.config.url}`, response.data)
     }
@@ -47,13 +43,11 @@ api.interceptors.response.use(
   },
   (error) => {
     console.error('[响应错误]', error)
-    // 处理网络错误
     if (!error.response) {
       console.error('网络连接失败，请检查后端服务是否启动或网络是否正常')
       return Promise.reject(new Error('网络连接失败'))
     }
     const status = error.response.status
-    // 区分不同角色的401跳转
     if (status === 401) {
       const isAdminPage = window.location.pathname.startsWith('/admin')
       sessionStorage.clear()
@@ -66,12 +60,10 @@ api.interceptors.response.use(
         window.location.href = '/login'
       }
     }
-    // 403权限不足统一处理
     else if (status === 403) {
       const msg = error.response.data?.msg || '您没有权限执行此操作'
       console.error(msg)
     }
-    // 500+服务器错误处理
     else if (status >= 500) {
       console.error('服务器内部错误，请稍后重试')
     }
@@ -81,9 +73,7 @@ api.interceptors.response.use(
 
 export default api
 
-// ===== 公共接口实例 =====
 // 用于无需登录态、且不希望在 token 过期时触发 401 自动跳转的公开接口，
-// 如「商品详情」「评论列表」。与主 api 实例共用同一 baseURL，
 // 但**不附带 Authorization、不做登录跳转**。全站统一从此处引入，避免各处重复创建。
 export const publicApi = axios.create({
   baseURL: API_BASE_URL,

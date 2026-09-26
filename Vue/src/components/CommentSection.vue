@@ -2,7 +2,7 @@
   <div class="comment-card">
     <h3 class="card-title">用户评论（{{ commentList.length }}）</h3>
 
-    <!--评论输入框-->
+    
     <div class="comment-input-wrap" v-if="isLoggedIn && !isAdmin">
       <img class="user-avatar" :src="currentUserAvatar" @error="handleUserAvatarError">
       <div class="input-right">
@@ -21,14 +21,14 @@
       </div>
     </div>
 
-    <!--登录提示-->
+    
     <div class="login-tip" v-else-if="!isLoggedIn">
       <span>请先</span>
       <span class="login-link" @click="goToLogin">登录</span>
       <span>后发表评论</span>
     </div>
 
-    <!--评论列表-->
+    
     <div class="comment-list">
       <div class="comment-item" v-for="comment in commentList" :key="comment.id">
         <img class="avatar" :src="comment.avatar || DEFAULT_PLACEHOLDER" @error="handleCommentAvatarError">
@@ -70,7 +70,6 @@ const props = defineProps({
 
 const router = useRouter()
 
-//用户角色
 const userRole = computed(() => {
   const token = sessionStorage.getItem('adminToken') || sessionStorage.getItem('token')
   if (!token) return ''
@@ -90,7 +89,6 @@ const isLoggedIn = computed(() => !!sessionStorage.getItem('token') || !!session
 const currentUserAvatar = ref(DEFAULT_PLACEHOLDER)
 const activeMenuId = ref(null)
 
-//当前用户ID
 const currentUserId = computed(() => {
   const token = sessionStorage.getItem('token')
   if (!token) return null
@@ -102,7 +100,6 @@ const currentUserId = computed(() => {
   }
 })
 
-//评论相关方法
 const getCommentsList = async () => {
   try {
     const res = await publicApi.get(`/api/comments/list/${props.goodsId}`)
@@ -147,7 +144,6 @@ const submitComment = async () => {
   }
 }
 
-//评论操作方法
 const isMyComment = (commentUserId) => {
   return currentUserId.value && String(commentUserId) === String(currentUserId.value)
 }
@@ -185,7 +181,6 @@ const goToLogin = () => {
   router.push('/login')
 }
 
-//图片错误处理
 const handleCommentAvatarError = (e) => {
   e.target.src = DEFAULT_PLACEHOLDER
 }
@@ -193,7 +188,6 @@ const handleUserAvatarError = (e) => {
   e.target.src = DEFAULT_PLACEHOLDER
 }
 
-//生命周期钩子
 onMounted(() => {
   getCommentsList()
   if (isLoggedIn.value && !isAdmin.value) {
@@ -292,7 +286,6 @@ onUnmounted(() => {
   cursor: not-allowed;
 }
 
-/* ===== 登录提示 ===== */
 .login-tip {
   text-align: center;
   padding: 20px;
@@ -309,7 +302,6 @@ onUnmounted(() => {
   font-weight: 500;
 }
 
-/* ===== 评论列表 ===== */
 .comment-list {
   display: flex;
   flex-direction: column;
@@ -368,7 +360,6 @@ onUnmounted(() => {
   line-height: 1.5;
 }
 
-/* ===== 评论菜单 ===== */
 .time-menu-wrapper {
   display: flex;
   align-items: center;

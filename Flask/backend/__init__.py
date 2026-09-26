@@ -11,17 +11,12 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-# ---------------------------------------------------------------------------
-# 输出流保护：stdout/stderr 失效（如从已关闭的终端/管道启动）时，写入静默丢弃。
 # 必须放在最前——任何 print/日志写失败都不允许把请求打成 500（OSError: [Errno 22]）。
 from backend.safe_stdio import install as _install_safe_stdio
 _install_safe_stdio()
 
-# ---------------------------------------------------------------------------
 # 必须先加载项目根目录 .env，再导入 extensions / config ——
-# 这两个模块在「导入时」就读取环境变量，dotenv 晚于它们则读不到。
 # 未安装 python-dotenv 时降级：仅使用进程已导出的环境变量。
-# ---------------------------------------------------------------------------
 try:
     from dotenv import load_dotenv
     load_dotenv(Path(__file__).resolve().parents[2] / '.env')
@@ -42,7 +37,6 @@ from backend.config import (
     CORS_ORIGINS,
 )
 
-
 def create_app():
     app = Flask(__name__)
 
@@ -54,7 +48,6 @@ def create_app():
         allow_headers=["Content-Type", "Authorization"],
     )
 
-    # ------------------------- 配置 -------------------------
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_POOL_SIZE'] = 50            # 连接池大小
@@ -87,14 +80,12 @@ def create_app():
     app.config['CELERY_BROKER_URL'] = CELERY_BROKER_URL
     app.config.from_object(Config)
 
-    # ------------------------- 初始化扩展 -------------------------
     db.init_app(app)
     jwt.init_app(app)
     scheduler.init_app(app)
     set_app(app)
     make_celery(app)  # 写入 extensions.celery
 
-    # ------------------------- 导入子模块（触发注册） -------------------------
     # 顺序：模型 -> 工具 -> 任务 -> 钩子 -> 调度任务 -> 蓝图
     import backend.models      # noqa: F401  注册 ORM 模型
     import backend.utils       # noqa: F401  工具函数
@@ -108,7 +99,6 @@ def create_app():
     for module in (auth, admin, goods, shop, user, orders, comments, recommend, ai):
         app.register_blueprint(module.bp)
 
-    # ------------------------- 建表 + ES 索引（ES 可选，不可用自动降级） -------------------------
     with app.app_context():
         db.create_all()
         from backend import es
@@ -116,7 +106,5 @@ def create_app():
 
     return app
 
-
-# 模块级暴露，供 `celery -A app.celery` 与 `python app.py` 使用
 app = create_app()
 from backend.extensions import celery  # noqa: E402  create_app 之后 celery 才就绪

@@ -12,7 +12,7 @@
       </button>
     </div>
 
-    <!--数据统计卡片-->
+    
     <div class="stat-cards">
       <StatCard label="今日请求量" :value="summary.total_requests" color="blue" />
       <StatCard label="平均响应时间" :value="summary.avg_duration" unit="ms" color="green" />
@@ -22,7 +22,7 @@
       <StatCard label="今日交易额" :value="`¥${orderOverview.today_revenue}`" color="cyan" />
     </div>
 
-    <!-- 请求量趋势图-->
+    
     <div class="chart-row">
       <div class="chart-card chart-wide">
         <h3 class="chart-title">请求量趋势（最近60分钟）</h3>
@@ -30,7 +30,6 @@
       </div>
     </div>
 
-    <!--用户活跃趋势  搜索关键词-->
     <div class="chart-row">
       <div class="chart-card">
         <h3 class="chart-title">用户活跃趋势（24小时）</h3>
@@ -42,7 +41,7 @@
       </div>
     </div>
 
-    <!--商品销量 订单状态 -->
+    
     <div class="chart-row">
       <div class="chart-card">
         <h3 class="chart-title">商品销量 Top10</h3>
@@ -69,7 +68,6 @@ const goBack = () => {
   router.push('/admin/dashboard')
 }
 
-//响应式数据定义
 const loading = ref(false)
 const summary = ref({ total_requests: 0, avg_duration: 0, error_rate: 0 })
 const timeline = ref([])
@@ -78,7 +76,6 @@ const productRanking = ref({ by_sales: [] })
 const orderOverview = ref({ today_orders: 0, today_revenue: 0, status_distribution: [] })
 const searchKeywords = ref([])
 
-//API请求方法
 const fetchAllData = async () => {
   loading.value = true
   try {
@@ -105,7 +102,6 @@ const fetchAllData = async () => {
   }
 }
 
-// ===== 各图表 option（数据变化时自动重渲染） =====
 const lineOption = computed(() => ({
   tooltip: { trigger: 'axis' },
   legend: { data: ['请求数', '错误数', '平均耗时'], top: 0, textStyle: { fontSize: 12 } },
@@ -173,7 +169,6 @@ const orderPieOption = computed(() => {
   }
 })
 
-//生命周期钩子：定时刷新
 let refreshTimer = null
 onMounted(() => {
   fetchAllData()
@@ -186,7 +181,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* ===== 页面布局 ===== */
+
 .monitor-page {
   padding: 20px;
   max-width: 1400px;
@@ -237,7 +232,6 @@ onUnmounted(() => {
   margin: 0;
 }
 
-/* ===== 刷新按钮 ===== */
 .refresh-btn {
   display: flex;
   align-items: center;
@@ -262,7 +256,6 @@ onUnmounted(() => {
   cursor: not-allowed;
 }
 
-/* ===== 统计卡片 ===== */
 .stat-cards {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -270,7 +263,6 @@ onUnmounted(() => {
   margin-bottom: 20px;
 }
 
-/* ===== 图表区域 ===== */
 .chart-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -296,7 +288,6 @@ onUnmounted(() => {
   margin: 0 0 12px;
 }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 768px) {
   .monitor-page {
     padding: 12px;

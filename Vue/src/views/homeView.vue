@@ -1,7 +1,7 @@
 <template>
   <div class="home-page">
     <div class="page-container">
-      <!--轮播图-->
+      
       <div class="hero-carousel">
         <swiper
           :modules="modules"
@@ -18,9 +18,9 @@
             v-for="(slide, index) in carouselSlides" 
             :key="index"
             class="carousel-slide">
-            <!--卡片上半部分-->
+            
             <div class="card-bg" :style="{ backgroundImage: `url(${slide.image})` }"></div>
-            <!--卡片下半部分-->
+            
             <div class="card-footer">
               <span class="card-title">{{ slide.title }}</span>
               <button class="card-btn">{{ slide.buttonText }}</button>
@@ -29,7 +29,7 @@
         </swiper>
       </div>
 
-      <!--标题栏-->
+      
       <div class="title-row">
         <h2 class="page-title">热门商品推荐</h2>
         <div class="btn-group">
@@ -40,7 +40,6 @@
         </div>
       </div>
 
-      <!--加载/空状态/商品网格（无限滚动，触底追加 20）-->
       <LoadingState v-if="loading" message="正在加载商品..." />
       <EmptyState v-else-if="goodsList.length === 0" message="暂无商品，快去上架吧~" />
       <GoodsGrid v-else>
@@ -51,14 +50,14 @@
         />
       </GoodsGrid>
 
-      <!-- 触底哨兵 + 加载状态 -->
+      
       <div v-if="!loading && goodsList.length > 0" ref="sentinelRef" class="load-sentinel">
         <span v-if="loadingMore" class="load-hint">正在加载更多…</span>
         <span v-else-if="!hasMore" class="load-hint">— 已经到底啦 —</span>
       </div>
     </div>
 
-    <!--猜你喜欢弹窗-->
+    
     <AppDialog v-model="showRecommendModal" title="猜你喜欢" width="320px" gradient>
       <LoadingState v-if="recommendLoading" :spinner="false" message="正在分析您的偏好..." />
       <EmptyState v-else-if="recommendGoods.length === 0" message="暂无推荐商品" />
@@ -82,7 +81,6 @@ import GoodsGrid from '@/components/GoodsGrid.vue'
 import AppDialog from '@/components/AppDialog.vue'
 import { showAlert } from '@/utils/modal'
 import { useInfiniteLoad } from '@/composables/useInfiniteLoad'
-//swiper导入
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Pagination, Autoplay } from 'swiper/modules'
 import 'swiper/css'
@@ -94,17 +92,13 @@ import carousel3 from '@/assets/images/轮播图2.webp'
 import carousel4 from '@/assets/images/轮播图3.jfif'
 import carousel5 from '@/assets/images/轮播图4.webp'
 
-// Swiper 模块
 const modules = [Pagination, Autoplay]
 
-// Swiper 实例
 let swiperInstance = null
 const onSwiper = (swiper) => {
   swiperInstance = swiper
 }
 
-// 响应式数据定义
-// 商品无限滚动：初始 20，触底自动追加 20（与商品列表页同款交互）
 const {
   list: goodsList, loading, loadingMore, hasMore, sentinelRef
 } = useInfiniteLoad(
@@ -114,10 +108,8 @@ const {
   20
 )
 
-// 轮播图相关
 const currentSlide = ref(0)
 // 轮播运营位：优先取管理后台配置的 /api/banners（避免前端硬编码），
-// 接口为空/失败时回退到内置示例图
 const carouselSlides = ref([
   { image: carousel1, title: '热门手办推荐', buttonText: '查看详情' },
   { image: carousel2, title: '新品抢先看', buttonText: '查看详情' },
@@ -144,12 +136,10 @@ const onSlideChange = (swiper) => {
   currentSlide.value = swiper.realIndex
 }
 
-// 猜你喜欢相关
 const showRecommendModal = ref(false)
 const recommendGoods = ref([])
 const recommendLoading = ref(false)
 
-//猜你喜欢功能
 const openRecommend = async () => {
   showRecommendModal.value = true
   recommendLoading.value = true
@@ -169,7 +159,7 @@ const openRecommend = async () => {
 </script>
 
 <style scoped>
-/* ===== 页面布局 ===== */
+
 .home-page {
   min-height: 100vh;
   padding: 80px 40px;
@@ -177,7 +167,6 @@ const openRecommend = async () => {
   background: #f0f5fa;
 }
 
-/* ===== 居中叠加卡片轮播 ===== */
 .hero-carousel {
   position: relative;
   width: 100%;
@@ -203,20 +192,17 @@ const openRecommend = async () => {
   transition: opacity 0.5s ease;
 }
 
-/* 中间主图：清晰显示 */
 .carousel-slide.swiper-slide-active {
   z-index: 10;
   opacity: 1;
 }
 
-/* 左右相邻卡片：半透明 */
 .carousel-slide.swiper-slide-prev,
 .carousel-slide.swiper-slide-next {
   z-index: 5;
   opacity: 0.4;
 }
 
-/* 上半部分：背景图 - 占据大部分高度 */
 .card-bg {
   position: absolute;
   top: 0;
@@ -228,7 +214,6 @@ const openRecommend = async () => {
   background-repeat: no-repeat;
 }
 
-/* 下半部分：极紧凑信息区 - 贴合内容 */
 .card-footer {
   position: absolute;
   bottom: 0;
@@ -274,7 +259,6 @@ const openRecommend = async () => {
   margin: 0 auto;
 }
 
-/* ===== 标题栏 ===== */
 .title-row {
   display: flex;
   justify-content: space-between;
@@ -289,13 +273,11 @@ const openRecommend = async () => {
   margin: 0;
 }
 
-/* ===== 按钮组 ===== */
 .btn-group {
   display: flex;
   gap: 12px;
 }
 
-/* ===== 猜你喜欢按钮 ===== */
 .recommend-btn {
   display: flex;
   align-items: center;
@@ -326,7 +308,6 @@ const openRecommend = async () => {
   font-size: 16px;
 }
 
-/* ===== 刷新按钮 ===== */
 .refresh-btn {
   display: flex;
   align-items: center;
@@ -355,9 +336,6 @@ const openRecommend = async () => {
   font-size: 16px;
 }
 
-/* ===== 商品网格（滚动条下移即布局） ===== */
-
-/* ===== 响应式适配 ===== */
 @media (max-width: 1024px) {
   .hero-carousel {
     height: 420px;
@@ -385,7 +363,7 @@ const openRecommend = async () => {
     padding: 70px 16px;
   }
   
-  /* ===== 轮播图响应式 ===== */
+  
   .hero-carousel {
     height: 380px;
     margin-bottom: 20px;
@@ -423,7 +401,7 @@ const openRecommend = async () => {
     font-size: 12px;
   }
   
-  /* ===== 轮播图响应式 ===== */
+  
   .hero-carousel {
     height: 320px;
     margin-bottom: 16px;
@@ -453,7 +431,6 @@ const openRecommend = async () => {
   }
 }
 
-/* 单个商品卡片样式 */
 .recommend-single {
   display: flex;
   flex-direction: column;

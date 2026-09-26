@@ -11,7 +11,6 @@ AI 客服等接口的正常路径都会 print，一次写失败就把整个请�
 import io
 import sys
 
-
 class _SafeStream:
     """包装原始流：write/flush 失败时静默丢弃，其余属性透传。"""
 
@@ -38,7 +37,6 @@ class _SafeStream:
 
     def __getattr__(self, name):
         return getattr(self._raw, name)
-
 
 def install():
     """包裹 stdout/stderr（幂等，可重复调用）。"""

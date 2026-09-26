@@ -30,7 +30,6 @@ def get_comments_list(goods_id):
         print(f"获取评论失败: {e}")
         return jsonify({'code': 500, 'msg': '获取评论失败'})
 
-
 @bp.route('/api/comments/add', methods=['POST'])
 @jwt_required()
 def add_comment():
@@ -54,7 +53,6 @@ def add_comment():
         print(f"发表评论失败: {e}")
         return jsonify({'code': 500, 'msg': '发表评论失败'})
 
-
 @bp.route('/api/comments/delete/<int:comment_id>', methods=['DELETE'])
 @jwt_required()
 def delete_comment(comment_id):
@@ -71,5 +69,4 @@ def delete_comment(comment_id):
         db.session.rollback()
         print(f"删除评论失败: {e}")
         return jsonify({'code': 500, 'msg': '删除失败'}), 500
-
 

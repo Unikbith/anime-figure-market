@@ -35,7 +35,6 @@ def cart_list():
         print(f"获取购物车错误: {e}")
         return jsonify({'code': 500, 'msg': '获取购物车失败'})
 
-
 @bp.route('/api/cart/add', methods=['POST'])
 @jwt_required()
 def cart_add():
@@ -63,7 +62,6 @@ def cart_add():
         print(f"加入购物车错误: {e}")
         return jsonify({'code': 500, 'msg': '加入购物车失败'})
 
-
 @bp.route('/api/cart/update', methods=['POST'])
 @jwt_required()
 def cart_update():
@@ -81,7 +79,6 @@ def cart_update():
         db.session.rollback()
         return jsonify({'code': 500, 'msg': '修改失败'})
 
-
 @bp.route('/api/cart/delete/<int:id>', methods=['DELETE'])
 @jwt_required()
 def cart_delete(id):
@@ -96,7 +93,6 @@ def cart_delete(id):
         db.session.rollback()
         return jsonify({'code': 500, 'msg': '删除失败'})
 
-
 @bp.route('/api/cart/clear', methods=['DELETE'])
 @jwt_required()
 def clear_cart():
@@ -110,7 +106,6 @@ def clear_cart():
         db.session.rollback()
         print(f"清空购物车错误: {e}")
         return jsonify({'code': 500, 'msg': '支付失败，请重试'})
-
 
 @bp.route('/api/collect/add', methods=['POST'])
 @jwt_required()
@@ -135,7 +130,6 @@ def add_collect():
         db.session.rollback()
         print(f'添加收藏失败: {e}')
         return jsonify({'code': 500, 'msg': '收藏失败'}), 500
-
 
 @bp.route('/api/collect/delete', methods=['POST'])
 @jwt_required()
@@ -162,7 +156,6 @@ def delete_collect():
         print(f'取消收藏失败: {e}')
         return jsonify({'code': 500, 'msg': '操作失败'}), 500
 
-
 @bp.route('/api/collect/list', methods=['GET'])
 @jwt_required()
 def get_collect_list():
@@ -186,7 +179,6 @@ def get_collect_list():
         print(f'获取收藏列表失败: {e}')
         return jsonify({'code': 500, 'msg': '获取失败'}), 500
 
-
 @bp.route('/api/collect/check', methods=['GET'])
 @jwt_required()
 def check_collect():
@@ -201,4 +193,3 @@ def check_collect():
     except Exception as e:
         print(f'检查收藏状态失败: {e}')
         return jsonify({'code': 500, 'msg': '检查失败'}), 500
-

@@ -60,7 +60,7 @@
 </script>
 
 <style scoped>
-/* ===== 页脚主体 ===== */
+
 .site-footer {
   background: linear-gradient(180deg, #f8fafc 0%, #e8eef5 100%);
   color: #4a5568;
@@ -75,7 +75,6 @@
   padding: 0 40px;
 }
 
-/* ===== 页脚内容区域 ===== */
 .footer-content {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -88,7 +87,6 @@
   min-width: 0;
 }
 
-/* ===== 通用标题样式 ===== */
 .section-title {
   font-size: 16px;
   font-weight: 600;
@@ -96,7 +94,6 @@
   color: #2d3748;
 }
 
-/* ===== 链接列表 ===== */
 .link-list {
   list-style: none;
   margin: 0;
@@ -121,7 +118,6 @@
   padding-left: 4px;
 }
 
-/* ===== 联系方式 ===== */
 .contact-list {
   list-style: none;
   margin: 0;
@@ -142,7 +138,6 @@
   font-size: 14px;
 }
 
-/* ===== 底部版权区 ===== */
 .footer-bottom {
   display: flex;
   justify-content: space-between;
@@ -180,7 +175,6 @@
   font-size: 12px;
 }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 1200px) {
   .footer-content {
     grid-template-columns: repeat(2, 1fr);

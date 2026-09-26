@@ -47,7 +47,6 @@ def admin_login():
         'userId': 0
     })
 
-
 @bp.route('/api/admin/users', methods=['GET'])
 @admin_required
 def admin_get_users():
@@ -74,7 +73,6 @@ def admin_get_users():
         print(f"管理员获取用户列表错误: {e}")
         return jsonify({'code': 500, 'msg': '获取用户列表失败'}), 500
 
-
 @bp.route('/api/admin/user/delete/<int:id>', methods=['DELETE'])
 @admin_required
 def admin_delete_user(id):
@@ -95,7 +93,6 @@ def admin_delete_user(id):
         print(f"管理员删除用户错误: {e}")
         return jsonify({'code': 500, 'msg': '删除用户失败'}), 500
 
-
 @bp.route('/api/admin/user/update/<int:id>', methods=['POST'])
 @admin_required
 def admin_update_user(id):
@@ -104,7 +101,6 @@ def admin_update_user(id):
         user = User.query.get_or_404(id)
         data = request.get_json()
 
-        # 处理 User 表字段
         if 'nickname' in data and data['nickname'].strip():
             user.nickname = data['nickname'].strip()
         if 'role' in data:
@@ -113,7 +109,6 @@ def admin_update_user(id):
                 return jsonify({'code': 400, 'msg': '无效角色，仅支持普通用户和商家'}), 400
             user.role = data['role']
 
-        # 用户资料字段（原 UserInfo 已并入 users）
         if 'avatar' in data:
             user.avatar = fix_image_url(data['avatar'].strip())
         if 'phone' in data:
@@ -127,7 +122,6 @@ def admin_update_user(id):
         db.session.rollback()
         print(f"管理员修改用户错误: {e}")
         return jsonify({'code': 500, 'msg': '修改用户信息失败'}), 500
-
 
 @bp.route('/api/admin/merchant/approve/<int:user_id>', methods=['POST'])
 @admin_required
@@ -154,7 +148,6 @@ def admin_approve_merchant(user_id):
         print(f"通过入驻申请失败: {e}")
         return jsonify({'code': 500, 'msg': '操作失败'}), 500
 
-
 @bp.route('/api/admin/merchant/reject/<int:user_id>', methods=['POST'])
 @admin_required
 def admin_reject_merchant(user_id):
@@ -180,7 +173,6 @@ def admin_reject_merchant(user_id):
         print(f"拒绝入驻申请失败: {e}")
         return jsonify({'code': 500, 'msg': '操作失败'}), 500
 
-
 @bp.route('/api/admin/user/detail/<int:id>', methods=['GET'])
 @admin_required
 def admin_get_user_detail(id):
@@ -188,7 +180,6 @@ def admin_get_user_detail(id):
     try:
         user = User.query.get_or_404(id)
 
-        # 统计用户相关数据
         order_count = Order.query.filter_by(user_id=id).count()
         cart_count = Cart.query.filter_by(user_id=id).count()
         collect_count = Collect.query.filter_by(user_id=id).count()
@@ -222,7 +213,6 @@ def admin_get_user_detail(id):
         print(f"管理员获取用户详情错误: {e}")
         return jsonify({'code': 500, 'msg': '获取用户详情失败'}), 500
 
-
 @bp.route('/api/admin/user/ban/<int:id>', methods=['POST'])
 @admin_required
 def admin_ban_user(id):
@@ -239,7 +229,6 @@ def admin_ban_user(id):
         print(f"管理员封禁用户错误: {e}")
         return jsonify({'code': 500, 'msg': '封禁用户失败'}), 500
 
-
 @bp.route('/api/admin/user/unban/<int:id>', methods=['POST'])
 @admin_required
 def admin_unban_user(id):
@@ -253,7 +242,6 @@ def admin_unban_user(id):
         db.session.rollback()
         print(f"管理员解封用户错误: {e}")
         return jsonify({'code': 500, 'msg': '解封用户失败'}), 500
-
 
 @bp.route('/api/admin/goods', methods=['GET'])
 @admin_required
@@ -282,14 +270,12 @@ def admin_get_goods():
         print(f"管理员获取商品列表错误: {e}")
         return jsonify({'code': 500, 'msg': '获取商品列表失败'}), 500
 
-
 @bp.route('/api/admin/goods/delete/<int:id>', methods=['DELETE'])
 @admin_required
 def admin_delete_goods(id):
     """并清除关联数据与缓存"""
     try:
         goods = Goods.query.get_or_404(id)
-        # 级联删除关联数据
         Cart.query.filter_by(goods_id=id).delete()
         History.query.filter_by(goods_id=id).delete()
         Comment.query.filter_by(goods_id=id).delete()
@@ -308,7 +294,6 @@ def admin_delete_goods(id):
         print(f"管理员删除商品错误: {e}")
         return jsonify({'code': 500, 'msg': '删除商品失败'}), 500
 
-
 @bp.route('/api/admin/goods/update/<int:id>', methods=['POST'])
 @admin_required
 def admin_update_goods(id):
@@ -325,7 +310,6 @@ def admin_update_goods(id):
         goods.ip = data.get('ip', goods.ip)
         goods.charactername = data.get('charactername', goods.charactername)
         goods.description = data.get('description', goods.description)
-        # 同步Redis缓存
         redis_client.set(f"goods_stock:{id}", goods.stock)
         redis_client.delete(f'goods_detail:{id}')
         cache_invalidate('goods_list:*')
@@ -336,7 +320,6 @@ def admin_update_goods(id):
         db.session.rollback()
         print(f"管理员修改商品错误: {e}")
         return jsonify({'code': 500, 'msg': '修改商品失败'}), 500
-
 
 @bp.route('/api/admin/goods/status/<int:id>', methods=['POST'])
 @admin_required
@@ -355,7 +338,6 @@ def admin_toggle_goods_status(id):
             goods.status = "下架"
         db.session.commit()
         es.index_goods(goods)   # 同步 ES 索引
-        # 清理 Redis 缓存
         cache_invalidate('goods_list:*')
         redis_client.delete(f'goods_detail:{id}')
 
@@ -367,7 +349,6 @@ def admin_toggle_goods_status(id):
         db.session.rollback()
         print(f"商品上下架操作失败: {e}")
         return jsonify({'code': 500, 'msg': '操作失败，服务器异常'}), 500
-
 
 @bp.route('/api/admin/orders', methods=['GET'])
 @admin_required
@@ -400,7 +381,6 @@ def admin_get_orders():
         print(f"管理员获取订单列表错误: {e}")
         return jsonify({'code': 500, 'msg': '获取订单列表失败'}), 500
 
-
 @bp.route('/api/admin/order/update/<int:id>', methods=['POST'])
 @admin_required
 def admin_update_order(id):
@@ -420,7 +400,6 @@ def admin_update_order(id):
         print(f"管理员修改订单错误: {e}")
         return jsonify({'code': 500, 'msg': '修改订单失败'}), 500
 
-
 @bp.route('/api/admin/order/delete/<int:id>', methods=['DELETE'])
 @admin_required
 def admin_delete_order(id):
@@ -435,7 +414,6 @@ def admin_delete_order(id):
         db.session.rollback()
         print(f"管理员删除订单错误: {e}")
         return jsonify({'code': 500, 'msg': '删除订单失败'}), 500
-
 
 @bp.route('/api/admin/monitor/realtime', methods=['GET'])
 @admin_required
@@ -458,7 +436,6 @@ def monitor_realtime():
                 'avg_duration': avg_dur
             })
 
-        # 今日汇总
         today_total = sum(m['total'] for m in minutes)
         today_errors = sum(m['errors'] for m in minutes)
         today_avg = int(sum(m['avg_duration'] * m['total'] for m in minutes) / today_total) if today_total > 0 else 0
@@ -478,7 +455,6 @@ def monitor_realtime():
         print(f"获取实时监控数据错误: {e}")
         return jsonify({'code': 500, 'msg': '获取监控数据失败'}), 500
 
-
 @bp.route('/api/admin/monitor/user-activity', methods=['GET'])
 @admin_required
 def monitor_user_activity():
@@ -488,7 +464,6 @@ def monitor_user_activity():
         active_users = redis_client.scard(f'monitor:active_users:{today_key}')
         new_registrations = int(redis_client.get(f'monitor:new_registrations:{today_key}') or 0)
 
-        # 每小时活跃用户趋势
         hourly = []
         now = datetime.now()
         for i in range(23, -1, -1):
@@ -509,13 +484,11 @@ def monitor_user_activity():
         print(f"获取用户活跃度错误: {e}")
         return jsonify({'code': 500, 'msg': '获取数据失败'}), 500
 
-
 @bp.route('/api/admin/monitor/product-ranking', methods=['GET'])
 @admin_required
 def monitor_product_ranking():
     """商品热度排行：销量Top10"""
     try:
-        # 销量Top10
         from sqlalchemy import func
         sales = db.session.query(
             Goods.name, func.sum(OrderItem.num).label('count')
@@ -535,7 +508,6 @@ def monitor_product_ranking():
         print(f"获取商品排行错误: {e}")
         return jsonify({'code': 500, 'msg': '获取数据失败'}), 500
 
-
 @bp.route('/api/admin/monitor/order-overview', methods=['GET'])
 @admin_required
 def monitor_order_overview():
@@ -543,17 +515,14 @@ def monitor_order_overview():
     try:
         today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-        # 1. 今日所有订单
         today_orders = Order.query.filter(Order.created_at >= today_start).all()
         today_order_count = len(today_orders)
 
-        # 2. 今日交易额（已付款/发货/收货/完成的订单）
         paid_statuses = ('pending_ship', 'pending_receive', 'completed')
         today_revenue = sum(
             float(o.total_price) for o in today_orders if o.status in paid_statuses
         )
 
-        # 3. 今日订单状态分布
         status_labels = {
             'pending_pay': '待付款', 'pending_ship': '待发货',
             'pending_receive': '待收货', 'completed': '已完成',
@@ -578,7 +547,6 @@ def monitor_order_overview():
         print(f"获取订单概览错误: {e}")
         return jsonify({'code': 500, 'msg': '获取数据失败'}), 500
 
-
 @bp.route('/api/admin/monitor/search-keywords', methods=['GET'])
 @admin_required
 def monitor_search_keywords():
@@ -586,7 +554,6 @@ def monitor_search_keywords():
     try:
         snapshots = Snapshot.query.filter_by(type='search_keyword').order_by(Snapshot.count.desc()).all()
         if not snapshots:
-            # 快照为空时实时计算一次并写入
             scheduled_refresh_search_keywords()
             snapshots = Snapshot.query.filter_by(type='search_keyword').order_by(Snapshot.count.desc()).all()
 
@@ -596,17 +563,12 @@ def monitor_search_keywords():
         print(f"获取搜索关键词错误: {e}")
         return jsonify({'code': 500, 'msg': '获取数据失败'}), 500
 
-
-
-
 def _safe_int(val, default=0):
     """安全转 int：非法值返回默认值，避免 500"""
     try:
         return int(val)
     except (TypeError, ValueError):
         return default
-
-# ==================== 轮播运营位管理 ====================
 
 @bp.route('/api/admin/banners', methods=['GET'])
 @admin_required
@@ -627,7 +589,6 @@ def admin_get_banners():
     except Exception as e:
         print(f'管理员获取轮播失败: {e}')
         return jsonify({'code': 500, 'msg': '获取轮播失败'}), 500
-
 
 @bp.route('/api/admin/banner/add', methods=['POST'])
 @admin_required
@@ -654,7 +615,6 @@ def admin_add_banner():
         print(f'添加轮播失败: {e}')
         return jsonify({'code': 500, 'msg': '添加失败'}), 500
 
-
 @bp.route('/api/admin/banner/update/<int:id>', methods=['POST'])
 @admin_required
 def admin_update_banner(id):
@@ -680,7 +640,6 @@ def admin_update_banner(id):
         db.session.rollback()
         print(f'修改轮播失败: {e}')
         return jsonify({'code': 500, 'msg': '修改失败'}), 500
-
 
 @bp.route('/api/admin/banner/delete/<int:id>', methods=['DELETE'])
 @admin_required

@@ -19,7 +19,6 @@
 import { ref, computed } from 'vue'
 
 export function useDialogForm(props, emit) {
-  // v-model 双向绑定：父组件用 v-model:visible 控制显隐
   const visibleDialog = computed({
     get: () => props.visible,
     set: (v) => emit('update:visible', v)
@@ -28,13 +27,10 @@ export function useDialogForm(props, emit) {
   const formRef = ref()
   const saving = ref(false)
 
-  // 关闭弹窗（由「取消」按钮或遮罩/叉号触发）
   const handleClose = () => {
     visibleDialog.value = false
   }
 
-  // 弹窗完全关闭后的重置：清空校验态并解除 loading
-  // 在 <el-dialog @closed="resetForm"> 上调用
   const resetForm = () => {
     formRef.value?.clearValidate()
     saving.value = false

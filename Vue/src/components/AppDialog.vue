@@ -99,7 +99,6 @@ const handleClose = () => {
   border-top: 1px solid #f0f0f0;
 }
 
-/* 渐变标题样式（用于首页猜你喜欢类弹窗） */
 .modal-gradient .modal-header {
   background: linear-gradient(135deg, #fb7299, #ff9b7a);
 }

@@ -1,9 +1,5 @@
-// ===== 全局环境配置 =====
-// 取值来自项目根目录 .env（vite.config.js 已把 envDir 指向上一级）。
 // 注意：Vite 只会把 VITE_ 前缀的变量注入浏览器，后端密钥不会进入前端产物。
-// 模板见根目录 .env.example；生产部署时按实际环境修改 .env。
 
-// 后端 API 接口地址：留空表示走同源请求，由部署层反向代理 /api
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 // 前端支付网关地址（用于生成扫码支付的二维码 URL）

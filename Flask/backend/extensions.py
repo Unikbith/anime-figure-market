@@ -16,12 +16,8 @@ from backend.config import (
     MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET, MINIO_SECURE,
 )
 
-
-# ----------------------------- 数据库 / ORM -----------------------------
 db = SQLAlchemy()
 
-
-# ----------------------------- 缓存 / 队列 broker -----------------------------
 redis_client = redis.Redis(
     host=REDIS_HOST,
     port=REDIS_PORT,
@@ -29,16 +25,10 @@ redis_client = redis.Redis(
     decode_responses=True
 )
 
-
-# ----------------------------- JWT -----------------------------
 jwt = JWTManager()
 
-
-# ----------------------------- 定时任务（APScheduler） -----------------------------
 scheduler = APScheduler()
 
-
-# ----------------------------- 对象存储（MinIO，S3 兼容） -----------------------------
 # 连接参数统一来自 backend.config（其值由环境变量 / 根目录 .env 提供）
 minio_client = Minio(
     MINIO_ENDPOINT,
@@ -58,17 +48,12 @@ try:
 except Exception as e:
     print(f"MinIO 初始化跳过（MinIO 未运行？）: {e}")
 
-
-# ----------------------------- Celery（延迟创建，需 app.config） -----------------------------
-# placeholders，create_app 中通过 make_celery(app) 填充
 celery = None
 app = None  # app 实例占位，由 create_app 注入，供 utils/tasks 取 app_context 使用
-
 
 def set_app(flask_app):
     global app
     app = flask_app
-
 
 def make_celery(flask_app):
     """根据 app.config 创建 Celery 实例（broker / backend 指向 Redis）"""

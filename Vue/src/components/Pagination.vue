@@ -22,7 +22,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 
-// Props定义
 const props = defineProps({
   currentPage: {
     type: Number,
@@ -38,32 +37,26 @@ const props = defineProps({
   }
 })
 
-// Emits定义
 const emit = defineEmits(['update:currentPage'])
 
-// 响应式数据
 const jumpPage = ref('')
 
-// 计算属性：总页数
 const totalPages = computed(() => {
   return Math.ceil(props.total / props.pageSize) || 1
 })
 
-// 上一页
 const handlePrev = () => {
   if (props.currentPage > 1) {
     emit('update:currentPage', props.currentPage - 1)
   }
 }
 
-// 下一页
 const handleNext = () => {
   if (props.currentPage < totalPages.value) {
     emit('update:currentPage', props.currentPage + 1)
   }
 }
 
-// 跳转指定页
 const handleJump = () => {
   const page = parseInt(jumpPage.value)
   if (page >= 1 && page <= totalPages.value) {
@@ -72,14 +65,13 @@ const handleJump = () => {
   }
 }
 
-// 监听total变化重置页码
 watch(() => props.total, () => {
   emit('update:currentPage', 1)
 })
 </script>
 
 <style scoped>
-/* ===== 分页控件 ===== */
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -172,7 +164,6 @@ watch(() => props.total, () => {
   color: #fff;
 }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 768px) {
   .pagination {
     flex-wrap: wrap;

@@ -1,6 +1,6 @@
 <template>
   <div class="goods-page">
-    <!--分类筛选抽屉-->
+    
     <div class="filter-overlay" v-show="showFilter" @click="showFilter = false"></div>
     <div class="filter-drawer" :class="{ open: showFilter }">
       <div class="filter-header">
@@ -37,7 +37,7 @@
 
       <EmptyState v-else-if="goodsList.length === 0" message="该分类下暂无商品" />
 
-      <!--商品网格（无限滚动，每排 4 个）-->
+      
       <div v-else class="goods-grid">
         <GoodsCard
           v-for="goods in goodsList"
@@ -46,7 +46,7 @@
         />
       </div>
 
-      <!-- 触底哨兵 + 加载状态 -->
+      
       <div v-if="!loading && goodsList.length > 0" ref="sentinelRef" class="load-sentinel">
         <span v-if="loadingMore" class="load-hint">正在加载更多…</span>
         <span v-else-if="!hasMore" class="load-hint">— 已经到底啦 —</span>
@@ -67,7 +67,6 @@ const selectedCategory = ref('')
 const categoryList = ref([]) // 分类列表
 const showFilter = ref(false) // 控制抽屉显示
 
-// 商品无限滚动：初始 20，触底追加 20（可复用组合式函数）
 const {
   list: goodsList, loading, loadingMore, hasMore, sentinelRef, load: loadGoods
 } = useInfiniteLoad(
@@ -81,7 +80,6 @@ const {
   20
 )
 
-//获取商品选项列表API请求方法
 const getGoodsOptions = async () => {
   try {
     const res = await request.get('/api/goods/options')
@@ -93,7 +91,6 @@ const getGoodsOptions = async () => {
   }
 }
 
-//选择分类（重置列表重新加载）
 const selectCategory = (cate) => {
   if (selectedCategory.value === cate) { showFilter.value = false; return }
   selectedCategory.value = cate
@@ -105,7 +102,7 @@ onMounted(() => { getGoodsOptions() })
 </script>
 
 <style scoped>
-/* ===== 页面布局 ===== */
+
 .goods-page {
   min-height: 100vh;
   padding: 80px 40px 40px;
@@ -114,7 +111,6 @@ onMounted(() => { getGoodsOptions() })
   position: relative;
 }
 
-/* ===== 筛选遮罩 ===== */
 .filter-overlay {
   position: fixed;
   top: 0;
@@ -127,7 +123,6 @@ onMounted(() => { getGoodsOptions() })
   animation: fadeIn 0.25s ease-out;
 }
 
-/* ===== 右侧抽屉 ===== */
 .filter-drawer {
   position: fixed;
   top: 0;
@@ -229,7 +224,6 @@ onMounted(() => { getGoodsOptions() })
   z-index: 1;
 }
 
-/* ===== 页面头部 ===== */
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -259,7 +253,6 @@ onMounted(() => { getGoodsOptions() })
   border-radius: 2px;
 }
 
-/* ===== 筛选器 ===== */
 .filter-wrap {
   display: flex;
   align-items: center;
@@ -300,14 +293,12 @@ onMounted(() => { getGoodsOptions() })
   color: #6a9bdb;
 }
 
-/* ===== 商品网格 ===== */
 .goods-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
 }
 
-/* 无限滚动触底哨兵 */
 .load-sentinel {
   grid-column: 1 / -1;
   display: flex;
@@ -325,7 +316,6 @@ onMounted(() => { getGoodsOptions() })
   to { opacity: 1; }
 }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 1200px) {
   .goods-page {
     padding: 80px 30px 40px;

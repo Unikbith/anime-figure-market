@@ -1,6 +1,6 @@
 <template>
   <div class="search-page">
-    <!--搜索栏 -->
+    
     <div class="search-container">
       <input 
         v-model="searchKeyword" 
@@ -18,23 +18,23 @@
       </button>
     </div>
 
-    <!--加载状态-->
+    
     <LoadingState v-if="loading" message="正在加载中..." />
 
-    <!--错误状态-->
+    
     <div v-if="error" class="error">
       <p>{{ error }}</p>
       <button @click="handleSearch">重新搜索</button>
     </div>
 
-    <!--商品列表-->
+    
     <div v-if="!loading && !error" class="goods-section">
       <div class="section-header">
         <h3 v-if="searchKeyword.trim()">搜索结果</h3>
         <h3 v-else>推荐商品</h3>
       </div>
       
-      <!--空状态-->
+      
       <EmptyState v-if="goodsList.length === 0" message="暂无相关商品" />
 
       <!--商品网格（复用全站统一的 GoodsGrid，保证列数与卡片比例一致）-->
@@ -60,20 +60,17 @@ import GoodsGrid from '@/components/GoodsGrid.vue'
 
 const router = useRouter()
 
-//响应式数据定义
 const searchKeyword = ref('')
 const goodsList = ref([])
 const loading = ref(false)
 const error = ref('')
 let timer = null
 
-//随机选取商品
 const getRandomGoods = (list, count = 8) => {
   const shuffled = [...list].sort(() => Math.random() - 0.5)
   return shuffled.slice(0, count)
 }
 
-//获取推荐商品API请求方法
 const getRandomRecommend = async () => {
   loading.value = true
   error.value = ''
@@ -93,7 +90,6 @@ const getRandomRecommend = async () => {
   }
 }
 
-//搜索方法
 const handleSearch = async () => {
   const keyword = searchKeyword.value.trim()
   
@@ -123,7 +119,6 @@ const handleSearch = async () => {
   }
 }
 
-//防抖搜索
 const debouncedSearch = () => {
   clearTimeout(timer)
   timer = setTimeout(() => {
@@ -131,7 +126,6 @@ const debouncedSearch = () => {
   }, 500)
 }
 
-//生命周期钩子
 onMounted(() => {
   getRandomRecommend()
 })
@@ -142,7 +136,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* ===== 页面布局 ===== */
+
 .search-page {
   min-height: 100vh;
   padding: 80px 40px 40px;
@@ -150,7 +144,6 @@ onUnmounted(() => {
   box-sizing: border-box;
 }
 
-/* ===== 搜索栏 ===== */
 .search-container {
   display: flex;
   align-items: center;
@@ -203,7 +196,6 @@ onUnmounted(() => {
   background: var(--brand-hover);
 }
 
-/* ===== 错误状态 ===== */
 .error {
   text-align: center;
   padding: 80px 20px;
@@ -226,7 +218,6 @@ onUnmounted(() => {
   background: var(--brand-hover);
 }
 
-/* ===== 商品区域 ===== */
 .goods-section {
   max-width: 1400px;
   margin: 0 auto;
@@ -243,7 +234,6 @@ onUnmounted(() => {
   margin: 0;
 }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 1200px) {
   .search-page {
     padding: 80px 30px 40px;

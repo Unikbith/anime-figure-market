@@ -1,6 +1,6 @@
 <template>
   <div class="filter-page">
-    <!-- 标签栏 -->
+    
     <div class="filter-header" :class="headerType === 'line' ? 'header-line' : 'header-pills'">
       <div class="tags-wrap" v-if="headerType === 'pills'">
         <div
@@ -35,7 +35,7 @@
       </button>
     </div>
 
-    <!-- 商品列表区 -->
+    
     <div class="page-container">
       <div v-if="(statusMode ? serverLoading : loading)" class="loading-wrap">
         <p>正在加载商品...</p>
@@ -50,13 +50,13 @@
           <GoodsCard v-for="goods in (statusMode ? serverList : listForRender)" :key="goods.id" :goods="goods" />
         </div>
 
-        <!-- status 模式触底哨兵 -->
+        
         <div v-if="statusMode" ref="sentinelRef" class="load-sentinel">
           <span v-if="loadingMore" class="load-hint">正在加载更多…</span>
           <span v-else-if="!hasMore" class="load-hint">— 已经到底啦 —</span>
         </div>
 
-        <!-- field 模式分页 -->
+        
         <Pagination
           v-if="!statusMode && showPagination && showGoods.length > 0"
           v-model:currentPage="currentPage"
@@ -76,17 +76,11 @@ import Pagination from '@/components/Pagination.vue'
 import { useInfiniteLoad } from '@/composables/useInfiniteLoad'
 
 const props = defineProps({
-  // 筛选模式：'field' 按商品字段取值打标签；'status' 按状态枚举打标签
   mode: { type: String, default: 'field' },
-  // field 模式：商品对象上的属性名，如 brand / charactername / ip
   field: { type: String, default: '' },
-  // 头部样式：'pills' 胶囊标签，'line' 居中下划线
   headerType: { type: String, default: 'pills' },
-  // 是否需要分页
   showPagination: { type: Boolean, default: false },
-  // 标签过多时是否显示"展开/收起"
   showExpand: { type: Boolean, default: true },
-  // status 模式下的标签组 [{ label, value }]
   statusTabs: { type: Array, default: () => [] },
 })
 
@@ -98,7 +92,6 @@ const defaultShowCount = 5
 const currentPage = ref(1)
 const pageSize = 10
 
-// status 模式：服务端分页虚拟列表（预购→预售 / 现货→现货）
 const statusMode = computed(() => props.mode === 'status')
 const {
   list: serverList, loading: serverLoading, loadingMore, hasMore, sentinelRef, load: loadServer
@@ -111,7 +104,6 @@ const {
   20
 )
 
-// 全部标签（field 模式每项为 { label, value }；status 模式直接用 statusTabs）
 const allTags = computed(() => {
   if (props.mode === 'status') return props.statusTabs
   const values = new Set()
@@ -119,7 +111,6 @@ const allTags = computed(() => {
   return [{ label: '全部', value: '' }, ...[...values].map(v => ({ label: v, value: v }))]
 })
 
-// 当前展示的标签（考虑展开状态）
 const displayTags = computed(() => {
   if (props.mode === 'status' || isExpanded.value) return allTags.value
   const defaultList = allTags.value.slice(0, defaultShowCount)
@@ -129,7 +120,6 @@ const displayTags = computed(() => {
   return defaultList
 })
 
-// 按当前选中项筛选商品
 const showGoods = computed(() => {
   if (props.mode === 'status') {
     return goodsList.value.filter(g => {
@@ -176,10 +166,9 @@ onMounted(() => { if (!statusMode.value) getGoodsList() })
 </script>
 
 <style scoped>
-/* ===== 页面布局 ===== */
+
 .filter-page { min-height: 100vh; background: var(--bg, #f4f6f8); }
 
-/* ===== 标签栏通用 ===== */
 .filter-header {
   background: white;
   border-bottom: 1px solid #e5e5e5;
@@ -188,7 +177,6 @@ onMounted(() => { if (!statusMode.value) getGoodsList() })
   z-index: 100;
 }
 
-/* ===== 胶囊标签（pills） ===== */
 .header-pills { padding: 20px 40px; }
 .tags-wrap { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
 .tag-item {
@@ -236,7 +224,6 @@ onMounted(() => { if (!statusMode.value) getGoodsList() })
   background: #fb7299;
 }
 
-/* ===== 商品列表容器 ===== */
 .page-container { max-width: 1400px; margin: 0 auto; padding: 20px 40px; }
 
 .loading-wrap,
@@ -250,7 +237,6 @@ onMounted(() => { if (!statusMode.value) getGoodsList() })
 
 .goods-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 1200px) {
   .page-container { padding: 20px 30px; }
   .goods-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }

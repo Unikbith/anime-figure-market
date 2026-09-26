@@ -14,7 +14,7 @@ from backend import app
 # 下面这行不是多余的：celery 命令通过 `-A app.celery` 读取本模块的 celery 属性，勿删
 from backend import celery  # noqa: F401
 from backend.extensions import scheduler
-from collections import defaultdict
+
 if __name__ == '__main__':
     # 避免 Flask debug 模式 reloader 重复启动调度器
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not app.debug:

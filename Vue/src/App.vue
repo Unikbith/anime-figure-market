@@ -19,7 +19,7 @@ import Footer from './components/Footer.vue';
 </script>
 
 <style>
-/* 应用容器布局 */
+
 .app-container {
   min-height: 100vh;
   display: flex;
@@ -28,7 +28,6 @@ import Footer from './components/Footer.vue';
   background-color: var(--bg);
 }
 
-/* 内容区域 */
 .content {
   flex: 1;
   margin: 20px auto 0;
@@ -39,7 +38,6 @@ import Footer from './components/Footer.vue';
   box-sizing: border-box;
 }
 
-/* 响应式适配 */
 @media (max-width: 768px) {
   .app-container {
     padding-top: 50px;

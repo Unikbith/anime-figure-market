@@ -8,7 +8,7 @@
       </div>
 
       <div v-else>
-        <!--收货地址-->
+        
         <div class="section address-section">
           <h3 class="section-title">收货地址</h3>
           <div class="address-card" v-if="hasAddress">
@@ -25,7 +25,7 @@
           </div>
         </div>
 
-        <!--商品信息-->
+        
         <div class="section goods-section">
           <h3 class="section-title">商品信息</h3>
           <div class="goods-list">
@@ -41,7 +41,7 @@
           </div>
         </div>
 
-        <!--价格计算-->
+        
         <div class="section price-section">
           <div class="price-row"><span>商品总价</span><span>¥{{ totalPrice }}</span></div>
           <div class="price-row"><span>运费</span><span>¥{{ shippingFee.toFixed(2) }}</span></div>
@@ -50,7 +50,7 @@
           </div>
         </div>
 
-        <!--提交订单区-->
+        
         <div class="submit-section">
           <button class="submit-btn" @click="submitOrder" :disabled="isSubmitting || !hasAddress || orderGoods.length === 0"
                   :title="!hasAddress ? '请先添加收货地址' : ''">
@@ -60,7 +60,7 @@
       </div>
     </div>
 
-    <!--地址编辑弹窗-->
+    
     <AppDialog v-model="showAddressModal" :title="hasAddress ? '编辑收货地址' : '添加收货地址'">
       <div class="form-group">
         <label>收货人</label>
@@ -97,7 +97,7 @@
       </template>
     </AppDialog>
 
-    <!--支付弹窗-->
+    
     <AppDialog :model-value="showPayModal" title="扫码支付" @update:model-value="closePayModal">
       <p class="pay-tip">请使用手机扫描下方二维码完成支付</p>
       <p class="pay-amount">支付金额：<span>¥{{ finalPrice }}</span></p>
@@ -127,16 +127,13 @@ import { showAlert } from '@/utils/modal'
 const router = useRouter();
 const route = useRoute();
 
-//响应式数据定义
 const loading = ref(false);
 const isSubmitting = ref(false);
 const isPaying = ref(false);
 
-
 const isBuyNow = ref(false);
 const buyNowGoods = ref(null);
 
-//地址数据
 const addressData = reactive({ name: "", phone: "", fullAddress: "" });
 const showAddressModal = ref(false);
 const addressForm = reactive({ name: "", phone: "", province: "", city: "", district: "", detail: "" });
@@ -144,11 +141,9 @@ const selectedProvince = ref("");
 const selectedCity = ref("");
 const selectedDistrict = ref("");
 
-//支付相关
 const showPayModal = ref(false)
 const currentOrderNo = ref('')
 
-//省市区级联数据
 const provinces = computed(() => regionData.map(item => ({ value: item.value, label: item.label })));
 const cities = computed(() => {
   if (!selectedProvince.value) return [];
@@ -162,7 +157,6 @@ const districts = computed(() => {
   return c?.children?.map(i => ({ value: i.value, label: i.label })) || [];
 });
 
-//商品与价格数据
 const orderGoods = ref([]);
 const shippingFee = ref(0);
 
@@ -170,7 +164,6 @@ const totalPrice = computed(() => orderGoods.value.reduce((s, i) => s + i.price 
 const finalPrice = computed(() => (parseFloat(totalPrice.value) + shippingFee.value).toFixed(2));
 const hasAddress = computed(() => !!(addressData.fullAddress && addressData.name && addressData.phone));
 
-//加载商品API请求方法
 const getSettlementGoods = async () => {
   loading.value = true;
   try {
@@ -189,7 +182,6 @@ const getSettlementGoods = async () => {
   }
 };
 
-//提交订单
 const submitOrder = async () => {
   if (!hasAddress.value) {
     await showAlert('请先添加收货地址')
@@ -233,7 +225,6 @@ const submitOrder = async () => {
   }
 };
 
-//地址相关逻辑
 const onProvinceChange = () => { 
   selectedCity.value = ""; 
   selectedDistrict.value = ""; 
@@ -251,7 +242,6 @@ watch(selectedDistrict, (newVal) => {
   }
 });
 
-//获取用户信息
 const getUserInfo = async () => {
   try {
     const res = await request.get("/api/user/info");
@@ -297,7 +287,6 @@ const updateFullAddress = () => {
   addressData.fullAddress = `${addressData.province||''}${addressData.city||''}${addressData.district||''}${addressData.detail||''}`;
 };
 
-//地址编辑弹窗操作
 const openAddressEditor = () => {
   addressForm.name = addressData.name;
   addressForm.phone = addressData.phone;
@@ -305,7 +294,6 @@ const openAddressEditor = () => {
   showAddressModal.value = true;
 };
 
-//保存地址
 const saveAddress = async () => {
   if (!addressForm.name.trim()) {
     await showAlert('请输入收货人姓名');
@@ -358,7 +346,6 @@ const closeAddressModal = () => {
   showAddressModal.value = false; 
 };
 
-//支付相关逻辑
 const closePayModal = () => { 
   showPayModal.value = false; 
   router.push('/profile');
@@ -395,7 +382,6 @@ const simulatePay = async () => {
   }
 };
 
-//工具函数
 const handleImgError = (e) => { 
   e.target.src = DEFAULT_PLACEHOLDER; 
 };
@@ -418,7 +404,6 @@ const handlePayNetworkError = (err) => {
   showAlert('网络错误，请检查网络连接');
 };
 
-//生命周期钩子
 onMounted(() => {
   getSettlementGoods();
   getUserInfo();
@@ -426,7 +411,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ===== 页面布局 ===== */
+
 .settlement-page {
   min-height: 100vh;
   padding: 80px 20px 40px;
@@ -456,7 +441,6 @@ onMounted(() => {
   font-size: 16px;
 }
 
-/* ===== 内容区块 ===== */
 .section {
   background: #fff;
   border-radius: 12px;
@@ -473,7 +457,6 @@ onMounted(() => {
   border-bottom: 1px solid #f0f0f0;
 }
 
-/* ===== 收货地址 ===== */
 .address-card {
   display: flex;
   align-items: center;
@@ -540,7 +523,6 @@ onMounted(() => {
   background: #ffe6ed;
 }
 
-/* ===== 地区选择器 ===== */
 .area-selects {
   display: flex;
   gap: 10px;
@@ -567,7 +549,6 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-/* ===== 商品列表 ===== */
 .goods-item {
   display: flex;
   align-items: center;
@@ -614,7 +595,6 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* ===== 价格汇总 ===== */
 .price-row {
   display: flex;
   justify-content: space-between;
@@ -636,7 +616,6 @@ onMounted(() => {
   font-size: 22px;
 }
 
-/* ===== 提交按钮 ===== */
 .submit-section {
   text-align: right;
 }
@@ -662,7 +641,6 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-/* ===== 弹窗表单 ===== */
 .form-group label {
   display: block;
   margin-bottom: 5px;
@@ -705,7 +683,6 @@ onMounted(() => {
   color: #fff;
 }
 
-/* ===== 支付弹窗内容 ===== */
 .pay-tip {
   font-size: 16px;
   color: #333;
@@ -756,7 +733,6 @@ onMounted(() => {
   text-align: center;
 }
 
-/* ===== 响应式适配 ===== */
 @media (max-width: 768px) {
   .settlement-page { padding: 70px 12px 24px; }
   .page-title { font-size: 20px; margin-bottom: 20px; }
