@@ -83,9 +83,7 @@
 │       ├── composables/        useInfiniteLoad、useDialogForm
 │       ├── utils/              图片兜底、弹窗工具
 │       └── styles/common.css   全局设计令牌与共享样式
-├── .env.example                配置模板，可提交
-├── start-services.ps1          一键启动 Redis + MinIO + Celery
-└── stop-services.ps1           停止上述服务
+└── .env.example                配置模板，可提交
 ```
 
 ---
@@ -132,14 +130,16 @@ cp .env.example .env
 CREATE DATABASE IF NOT EXISTS vue_db DEFAULT CHARSET utf8mb4;
 ```
 
-### 3. 启动中间件与 Celery
+### 3. 启动中间件
 
-```powershell
-powershell -ExecutionPolicy Bypass -File start-services.ps1
+Redis、MinIO 需自行启动（MySQL 为系统服务）：
+
+```bash
+redis-server --port 6379
+minio server <数据目录> --address 127.0.0.1:9000 --console-address 127.0.0.1:9001
 ```
 
-脚本会拉起 Redis(6379)、MinIO(9000，控制台 9001)，并用 `.env` 中的 `VENV_PYTHON` 拉起 Celery worker
-（Windows 下默认 `--pool=solo`）。MySQL 属于系统服务，脚本只做检测不负责启动。
+Redis 与 Celery 共用同一个实例，`.env` 中的 `CELERY_BROKER_URL` 需指向它。
 
 ### 4. 启动后端
 
@@ -150,7 +150,7 @@ python app.py
 
 默认监听 <http://127.0.0.1:5000>。
 
-如需单独调试 Celery（工作目录为 `Flask/`）：
+异步任务依赖 Celery worker（工作目录为 `Flask/`，Windows 下用 `--pool=solo`）：
 
 ```bash
 celery -A app.celery worker --loglevel=info --pool=solo
@@ -167,12 +167,6 @@ npm run dev
 - 管理端 <http://localhost:5173/admin/login>
 
 Vite 已将 `/api` 代理到 Flask(5000)、`/goods-images` 代理到 MinIO(9000)，前后端与图片资源之间不存在跨域问题。
-
-### 6. 停止
-
-```powershell
-.\stop-services.ps1
-```
 
 ---
 
@@ -191,8 +185,6 @@ Vite 已将 `/api` 代理到 Flask(5000)、`/goods-images` 代理到 MinIO(9000)
 | `ZHIPU_API_KEY` | 智谱 AI Key，可选 |
 | `MINIO_ENDPOINT` / `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` / `MINIO_BUCKET` | MinIO 对象存储 |
 | `ES_HOST` / `ES_PORT` | Elasticsearch 地址，可选 |
-| `VENV_PYTHON` | 一键脚本启动 Celery 使用的解释器 |
-| `REDIS_BIN` / `MINIO_BIN` / `MINIO_DATA` | 中间件路径 |
 | `CORS_ORIGINS` | 允许跨域的来源 |
 
 ---
@@ -253,7 +245,7 @@ git check-ignore .env Flask/jwt.key Flask/secret.key
 | --- | --- |
 | 后端启动报 MySQL 连接失败 | 确认 MySQL 服务已启动、连接串口令正确、`vue_db` 已创建 |
 | 报 `No module named 'redis' / 'celery' / 'pymysql'` | 当前解释器未安装本项目依赖，执行 `pip install -r requirements.txt` |
-| 一键脚本提示 Celery 启动后立即退出 | `VENV_PYTHON` 指向的解释器缺少 celery，改为与 Flask 相同的解释器 |
+| Celery 启动后立即退出 | 当前解释器缺少 celery，换成与 Flask 相同的解释器后重装依赖 |
 | Celery 任务一直不执行 | 确认 Redis 在跑，`CELERY_BROKER_URL` 正确，Windows 上使用 `--pool=solo` |
 | 商品图片 404 | 确认 MinIO 在跑且桶存在，后端首次启动会自动创建 |
 | 管理端登录提示未配置 | 在 `.env` 中设置 `ADMIN_PASSWORD` |
